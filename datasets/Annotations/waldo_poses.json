@@ -1,0 +1,1527 @@
+{
+  "_via_settings": {
+    "ui": {
+      "annotation_editor_height": 25,
+      "annotation_editor_fontsize": 0.8,
+      "leftsidebar_width": 18,
+      "image_grid": {
+        "img_height": 80,
+        "rshape_fill": "none",
+        "rshape_fill_opacity": 0.3,
+        "rshape_stroke": "yellow",
+        "rshape_stroke_width": 2,
+        "show_region_shape": true,
+        "show_image_policy": "all"
+      },
+      "image": {
+        "region_label": "__via_region_id__",
+        "region_color": "__via_default_region_color__",
+        "region_label_font": "10px Sans",
+        "on_image_annotation_editor_placement": "NEAR_REGION"
+      }
+    },
+    "core": {
+      "buffer_size": 18,
+      "filepath": {},
+      "default_filepath": ""
+    },
+    "project": {
+      "name": "waldo_poses"
+    }
+  },
+  "_via_img_metadata": {
+    "001.jpg12935714": {
+      "filename": "001.jpg",
+      "size": 12935714,
+      "regions": [
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 39,
+            "y": 231,
+            "width": 156,
+            "height": 218
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 611,
+            "y": 101,
+            "width": 156,
+            "height": 266
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 805,
+            "y": 146,
+            "width": 162,
+            "height": 253
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 971,
+            "y": 97,
+            "width": 136,
+            "height": 244
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1254,
+            "y": 127,
+            "width": 162,
+            "height": 244
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1546,
+            "y": 104,
+            "width": 162,
+            "height": 240
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 2416,
+            "y": 97,
+            "width": 143,
+            "height": 227
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 494,
+            "y": 250,
+            "width": 130,
+            "height": 224
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 276,
+            "y": 296,
+            "width": 140,
+            "height": 198
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4066,
+            "y": 247,
+            "width": 166,
+            "height": 227
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 3501,
+            "y": 448,
+            "width": 169,
+            "height": 257
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 3728,
+            "y": 97,
+            "width": 143,
+            "height": 270
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 3926,
+            "y": 13,
+            "width": 172,
+            "height": 211
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4248,
+            "y": 62,
+            "width": 156,
+            "height": 208
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 5417,
+            "y": 432,
+            "width": 156,
+            "height": 231
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4933,
+            "y": 169,
+            "width": 146,
+            "height": 234
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6212,
+            "y": 549,
+            "width": 179,
+            "height": 253
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 5722,
+            "y": 630,
+            "width": 208,
+            "height": 234
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6459,
+            "y": 490,
+            "width": 188,
+            "height": 244
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6855,
+            "y": 442,
+            "width": 175,
+            "height": 218
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6391,
+            "y": 146,
+            "width": 195,
+            "height": 224
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6644,
+            "y": 16,
+            "width": 156,
+            "height": 234
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6160,
+            "y": 26,
+            "width": 146,
+            "height": 250
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 5917,
+            "y": 65,
+            "width": 162,
+            "height": 253
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7869,
+            "y": 296,
+            "width": 162,
+            "height": 273
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7515,
+            "y": 526,
+            "width": 185,
+            "height": 221
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 8382,
+            "y": 354,
+            "width": 149,
+            "height": 234
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7833,
+            "y": 841,
+            "width": 146,
+            "height": 257
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 9281,
+            "y": 844,
+            "width": 159,
+            "height": 234
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 9327,
+            "y": 58,
+            "width": 156,
+            "height": 270
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 8999,
+            "y": 1049,
+            "width": 169,
+            "height": 237
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 8570,
+            "y": 1491,
+            "width": 169,
+            "height": 270
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 9512,
+            "y": 1432,
+            "width": 169,
+            "height": 321
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 9593,
+            "y": 942,
+            "width": 188,
+            "height": 273
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 9021,
+            "y": 1682,
+            "width": 182,
+            "height": 273
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 9181,
+            "y": 1705,
+            "width": 185,
+            "height": 292
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 9272,
+            "y": 2026,
+            "width": 172,
+            "height": 260
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 9651,
+            "y": 1854,
+            "width": 172,
+            "height": 263
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 8856,
+            "y": 2036,
+            "width": 195,
+            "height": 279
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 9051,
+            "y": 2270,
+            "width": 188,
+            "height": 283
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 9677,
+            "y": 2712,
+            "width": 175,
+            "height": 263
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 8219,
+            "y": 2358,
+            "width": 208,
+            "height": 244
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 8580,
+            "y": 2280,
+            "width": 182,
+            "height": 250
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7401,
+            "y": 2400,
+            "width": 192,
+            "height": 273
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7177,
+            "y": 2926,
+            "width": 198,
+            "height": 227
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 8609,
+            "y": 3296,
+            "width": 185,
+            "height": 240
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 8859,
+            "y": 2809,
+            "width": 175,
+            "height": 237
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7677,
+            "y": 1237,
+            "width": 179,
+            "height": 260
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4335,
+            "y": 1533,
+            "width": 211,
+            "height": 263
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 5365,
+            "y": 1133,
+            "width": 198,
+            "height": 244
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 5969,
+            "y": 1198,
+            "width": 185,
+            "height": 227
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6209,
+            "y": 1286,
+            "width": 172,
+            "height": 231
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 5696,
+            "y": 1601,
+            "width": 205,
+            "height": 237
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6070,
+            "y": 2302,
+            "width": 179,
+            "height": 244
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4066,
+            "y": 2221,
+            "width": 175,
+            "height": 270
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 3559,
+            "y": 2111,
+            "width": 172,
+            "height": 221
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 3416,
+            "y": 1572,
+            "width": 214,
+            "height": 257
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4530,
+            "y": 1364,
+            "width": 198,
+            "height": 227
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 3871,
+            "y": 1344,
+            "width": 188,
+            "height": 231
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4537,
+            "y": 2306,
+            "width": 218,
+            "height": 270
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4342,
+            "y": 2439,
+            "width": 192,
+            "height": 253
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4225,
+            "y": 3014,
+            "width": 172,
+            "height": 315
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4647,
+            "y": 2929,
+            "width": 162,
+            "height": 299
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 5375,
+            "y": 3358,
+            "width": 149,
+            "height": 312
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 5271,
+            "y": 3744,
+            "width": 175,
+            "height": 289
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 5339,
+            "y": 4615,
+            "width": 224,
+            "height": 292
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6950,
+            "y": 5037,
+            "width": 211,
+            "height": 283
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 5943,
+            "y": 5618,
+            "width": 201,
+            "height": 279
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7385,
+            "y": 5816,
+            "width": 162,
+            "height": 283
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 5478,
+            "y": 6216,
+            "width": 156,
+            "height": 296
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6706,
+            "y": 6430,
+            "width": 175,
+            "height": 312
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7567,
+            "y": 6599,
+            "width": 172,
+            "height": 292
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 3160,
+            "y": 6199,
+            "width": 175,
+            "height": 338
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 2208,
+            "y": 6449,
+            "width": 182,
+            "height": 312
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 2488,
+            "y": 6553,
+            "width": 221,
+            "height": 367
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1458,
+            "y": 6407,
+            "width": 169,
+            "height": 334
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4339,
+            "y": 6242,
+            "width": 162,
+            "height": 296
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4533,
+            "y": 6177,
+            "width": 159,
+            "height": 325
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 3809,
+            "y": 6307,
+            "width": 166,
+            "height": 302
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6102,
+            "y": 6144,
+            "width": 140,
+            "height": 296
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6388,
+            "y": 6073,
+            "width": 175,
+            "height": 318
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 393,
+            "y": 5037,
+            "width": 172,
+            "height": 270
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 896,
+            "y": 4917,
+            "width": 198,
+            "height": 328
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1156,
+            "y": 4871,
+            "width": 188,
+            "height": 318
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1494,
+            "y": 4430,
+            "width": 198,
+            "height": 334
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 2101,
+            "y": 4443,
+            "width": 162,
+            "height": 318
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 2283,
+            "y": 4848,
+            "width": 198,
+            "height": 360
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 2617,
+            "y": 4706,
+            "width": 188,
+            "height": 292
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 3030,
+            "y": 4404,
+            "width": 188,
+            "height": 357
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 3105,
+            "y": 5004,
+            "width": 192,
+            "height": 286
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 2640,
+            "y": 4946,
+            "width": 201,
+            "height": 270
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 3839,
+            "y": 4822,
+            "width": 169,
+            "height": 296
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4300,
+            "y": 3459,
+            "width": 140,
+            "height": 276
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4501,
+            "y": 3416,
+            "width": 182,
+            "height": 309
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4050,
+            "y": 3342,
+            "width": 136,
+            "height": 276
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 3384,
+            "y": 2871,
+            "width": 195,
+            "height": 263
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 3157,
+            "y": 3066,
+            "width": 192,
+            "height": 321
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 2676,
+            "y": 2897,
+            "width": 179,
+            "height": 289
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 4913,
+            "y": 3774,
+            "width": 130,
+            "height": 321
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6209,
+            "y": 4170,
+            "width": 140,
+            "height": 331
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6576,
+            "y": 3809,
+            "width": 153,
+            "height": 302
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7050,
+            "y": 3803,
+            "width": 195,
+            "height": 266
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7862,
+            "y": 4303,
+            "width": 146,
+            "height": 331
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7466,
+            "y": 4264,
+            "width": 169,
+            "height": 257
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7203,
+            "y": 4108,
+            "width": 179,
+            "height": 283
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7632,
+            "y": 4712,
+            "width": 169,
+            "height": 292
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7502,
+            "y": 5310,
+            "width": 166,
+            "height": 292
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 9301,
+            "y": 5751,
+            "width": 156,
+            "height": 373
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 8158,
+            "y": 6105,
+            "width": 182,
+            "height": 250
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7758,
+            "y": 6225,
+            "width": 162,
+            "height": 279
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 8963,
+            "y": 6229,
+            "width": 166,
+            "height": 218
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 8476,
+            "y": 6001,
+            "width": 172,
+            "height": 250
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7891,
+            "y": 4637,
+            "width": 175,
+            "height": 266
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6738,
+            "y": 4595,
+            "width": 188,
+            "height": 253
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 6014,
+            "y": 4784,
+            "width": 169,
+            "height": 315
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1864,
+            "y": 3303,
+            "width": 166,
+            "height": 279
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1403,
+            "y": 3543,
+            "width": 195,
+            "height": 296
+          },
+          "region_attributes": {
+            "pose": "tilt"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 2874,
+            "y": 3796,
+            "width": 159,
+            "height": 283
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 2549,
+            "y": 3725,
+            "width": 175,
+            "height": 283
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1202,
+            "y": 4293,
+            "width": 195,
+            "height": 328
+          },
+          "region_attributes": {
+            "pose": "side"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1643,
+            "y": 5556,
+            "width": 146,
+            "height": 276
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 5936,
+            "y": 3774,
+            "width": 162,
+            "height": 237
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 7794,
+            "y": 3137,
+            "width": 159,
+            "height": 244
+          },
+          "region_attributes": {
+            "pose": "front"
+          }
+        }
+      ],
+      "file_attributes": {}
+    }
+  },
+  "_via_attributes": {
+    "region": {
+      "pose": {
+        "type": "text",
+        "description": "",
+        "default_value": ""
+      }
+    },
+    "file": {}
+  }
+}
