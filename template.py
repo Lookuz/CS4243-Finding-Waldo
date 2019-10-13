@@ -5,10 +5,16 @@ import cyvlfeat as vlfeat
 
 from utils import *
 
+vocab_step = 5
+vocab_size = 4
+sample_step = 3
+sample_size = 4
+
+
 def get_color_feat(im):
     hsv_im = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)[:, :, 0]
     hist = cv.calcHist(hsv_im, channels=[0], mask=None, histSize=[256], ranges=[0, 256])
-    hist /= sum(hist)
+    hist /= np.linalg(hist)
     return hist.reshape(-1)
 
 
@@ -16,6 +22,12 @@ def get_contour_feat(im, step=3, size=4):
     grey_im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
     _, descriptors = vlfeat.sift.dsift(grey_im, fast=True, step=step, size=size)
     return descriptors
+
+def get_contour_feat_vocab(im):
+    return get_contour_feat(im, vocab_step, vocab_size)
+
+def get_contour_feat_sample(im):
+    return get_contour_feat(im, sample_step, sample_size)
 
 
 def positive_source(name):
@@ -54,12 +66,12 @@ def load_sub_positive_patch(name):
 
 def extract_vocabs(name, sub_correct=False):
     num_vocab_per_patch = 20
-    vocab_size = 50
+    vocab_size = 100
     sifts = []
     loader = load_sub_positive_patch if sub_correct else load_positive_patch()
 
     for img_data in loader(name):
-        descriptors = get_contour_feat(img_data)
+        descriptors = get_contour_feat_vocab(img_data)
         all_idxs = np.arange(len(descriptors))
         np.random.shuffle(all_idxs)
         sifts.extend(descriptors[:num_vocab_per_patch])

@@ -31,4 +31,58 @@ def fetch_feat_dict(class_name, overwrite=True):
     }
 
 
-def construct_training_data_per_class(class_name):
+def load_contour_feats(metric, vocabs, loader, *args):
+    vocab_num = len(vocabs)
+    feats = []
+    for img_data in loader(*args):
+        descriptors = get_contour_feat_sample(img_data)
+        dists = cdist(descriptors, vocabs, metric)
+        classifications = np.argmin(dists, axis=1)
+        occurences = np.bincount(classifications, minlength=vocab_num)
+        hist_feature = occurences / np.linalg.norm(occurences)
+        feats.append(hist_feature)
+    return np.array(feats, dtype='f')
+
+
+def load_color_feats(loader, *args):
+    feats = []
+    for img_data in loader(*args):
+        color_hist = get_color_feat(img_data)
+        feats.append(color_hist)
+    return np.array(feats, dtype='f')
+
+
+def contour_classifier(class_name, sub_correct=False, metric='euclidean'):
+    vocabs = extract_vocabs(class_name, sub_correct)
+    pos_loader = load_sub_positive_patch if sub_correct else load_positive_patch
+    neg_loader = get_contour_feat_sample
+
+    pos_feats = load_contour_feats(metric, vocabs, pos_loader, class_name)
+    neg_feats = load_contour_feats(metric, vocabs, neg_loader, 3)
+
+    pos_labels = np.ones(len(pos_feats))
+    neg_labels = np.zeros(len(neg_feats))
+
+    X = np.vstack((pos_feats, neg_feats))
+    Y = np.vstack((pos_labels, neg_labels))
+    clf = SVC(gamma='scale')
+    clf.fit(X, Y)
+    return clf
+
+
+def color_classifier(class_name, sub_correct=False):
+    # color_pattern = extract_color_features(class_name, sub_correct)
+    pos_loader = load_sub_positive_patch if sub_correct else load_positive_patch
+    neg_loader = get_contour_feat_sample
+
+    pos_feats = load_color_feats(pos_loader, class_name)
+    neg_feats = load_color_feats(neg_loader, class_name)
+    pos_labels = np.ones(len(pos_feats))
+    neg_labels = np.zeros(len(neg_feats))
+
+    X = np.vstack((pos_feats, neg_feats))
+    Y = np.vstack((pos_labels, neg_labels))
+    clf = SVC(gamma='scale')
+    clf.fit(X, Y)
+    return clf
+
