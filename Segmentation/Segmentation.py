@@ -42,3 +42,6 @@ def segment_image(image, model):
     segmented_image = segmented_image.reshape((image.shape))
 
     return segmented_image
+
+def segment_images(image_list, model):
+    return [lambda x: segment_image(x, model) for x in image_list]
