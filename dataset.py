@@ -9,6 +9,7 @@ import pickle
 import numpy as np
 import xml.etree.ElementTree as ET
 import json
+import shutil
 
 figure_classes = {'waldo', 'wenda', 'wizard'}
 extra_poses_classified = ['waldo']
@@ -36,6 +37,28 @@ def load_dir(dir):
 def load_full_subdir(dir):
     subdir = os.listdir(dir)
     return list(map(lambda x: os.path.join(dir, x), subdir))
+
+# Function that removes specified directory
+# Directory specified is recommended to be full path
+def del_dir(dir):
+    try:
+        shutil.rmtree(dir)
+    except OSError: # Directory invalid
+        print('Invalid directory specified')
+
+# Function that deletes files within the directory,
+# But keeps the empty directory
+def clean_dir(dir):
+    try:
+        for item in os.listdir(dir):
+            file_path = os.path.join(dir, item)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception as e:
+                print(e)
+    except OSError: # Directory invalid
+        print('Invalid directory specified')
 
 """"""""""""""""""""""""""""""""""""""""""""""""
 
@@ -276,11 +299,51 @@ def negative_loader(srcs, rand_num=3):
     for img_patch in load_random_patch(rand_num):
         yield img_patch
 
-def prepare_dataset():
-    save_provided_patches(True)
-    save_provided_patches(False)
-    save_poses()
-    save_extra_patches()
+# Function that extracts and preprocesses the given dataset
+# If clean=True is specified, then existing files will be deleted
+# before the preprocessed files are added again. This is to allow for a
+# fresh re-loading of data
+def prepare_dataset(clean=False):
+    curr_wd = os.getcwd()
+
+    # Extract Annotations
+    annot_source_path = os.path.join(curr_wd, 'cache_anno')
+    assert os.path.exist(annot_source_path)
+    if clean:
+        clean_dir(annot_source_path)
+    annot_source_path_train = os.path.join(annot_source_path, 'train_annots.pkl')
+    annot_source_path_val = os.path.join(annot_source_path, 'val_annots.pkl')
+    if not os.path.exists(annot_source_path_train):
+        extract_annots(validation=False)
+    if not os.path.exists(annot_source_path_val):
+        extract_annots(validation=True)
+
+    # Extract Window Patches
+    patch_source_path = os.path.join(curr_wd, 'datasets')
+    assert os.path.exist(patch_source_path)
+    patch_source_path_train = os.path.join(patch_source_path, 'train')
+    patch_source_path_val = os.path.join(patch_source_path, 'val')
+    if clean:
+        del_dir(patch_source_path_train)
+        del_dir(patch_source_path_val)
+    if not os.path.exists(patch_source_path_train):
+        save_provided_patches(validation=False)
+    if not os.path.exists(patch_source_path_val):
+        save_provided_patches(validation=True)
+
+    pose_source_path = os.path.join(curr_wd, 'datasets', 'waldo_extra')
+    if clean:
+        del_dir(waldo_extra)
+    if not os.path.exists(pose_source_path):
+        save_poses()
+
+    extra_poses_positive_path = os.path.join(curr_wd, 'datasets', 'extra', 'positives')
+    extra_poses_confusion_path = os.path.join(curr_wd, 'datasets', 'extra', 'confusion')
+    if clean:
+        del_dir(extra_poses_positive_path)
+        del_dir(extra_poses_confusion_path)
+    if not os.path.exists(extra_poses_confusion_path) or not os.path.exists(extra_poses_positive_path):
+        save_extra_patches()
 
 """"""""""""""""""""""""""""""""""""""""""""""""
 
