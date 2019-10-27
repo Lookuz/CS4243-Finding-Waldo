@@ -1,3 +1,8 @@
+"""
+Image Segmentation using Clustering
+Author: Lukaz
+"""
+
 import numpy as np
 from matplotlib import pyplot as plt
 import cv2
