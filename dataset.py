@@ -333,7 +333,7 @@ def prepare_dataset(clean=False):
 
     pose_source_path = os.path.join(curr_wd, 'datasets', 'waldo_extra')
     if clean:
-        del_dir(waldo_extra)
+        del_dir(pose_source_path)
     if not os.path.exists(pose_source_path):
         save_poses()
 
