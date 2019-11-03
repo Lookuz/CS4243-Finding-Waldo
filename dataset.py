@@ -23,6 +23,9 @@ def load_image(path):
 def img_to_show(im):
     return im[:, :, ::-1]
 
+def to_rgb(image):
+    return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
 """"""""""""""""""""""""""""""""""""""""""""""""
 
 """"""" Image File Path Extraction """""""

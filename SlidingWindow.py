@@ -3,7 +3,6 @@ import cv2
 import imutils
 import numpy as np
 
-
 # Creates an image pyramid using the scale provided
 def image_pyramid(image, scale=1.5, minSize=(100, 100)):
     # Original image
@@ -15,8 +14,7 @@ def image_pyramid(image, scale=1.5, minSize=(100, 100)):
 
         yield image
 
-
-# Sliding window subroutine that slides a window of
+# Sliding window subroutine that slides a window of 
 # window_size and skips step_size pixels every iteration over the image
 # window_size = (r, c) of the window to slide over
 # step_size: The number of pixels to skip over at each iteration
@@ -41,7 +39,7 @@ def intersection_area(box_1, box_2):
     x2 = min(box_1[2], box_2[2])
     y1 = max(box_1[1], box_2[1])
     y2 = min(box_1[3], box_2[3])
-
+    
     # Area of intersection
     width = x2 - x1 + 1
     height = y2 - y1 + 1
@@ -49,22 +47,22 @@ def intersection_area(box_1, box_2):
         return 0
     else:
         return width * height
-
+    
 
 # Function that calculates the intersection over union (IoU) of two bounding boxes
 def calculate_iou(box_1, box_2):
     intersection = intersection_area(box_1, box_2)
-
+    
     box1_area = (box_1[2] - box_1[0] + 1) * (box_1[3] - box_1[1] + 1)
     box2_area = (box_2[2] - box_2[0] + 1) * (box_2[3] - box_2[1] + 1)
-
+    
     iou = intersection / (box1_area + box2_area - intersection)
-
+    
     return iou
 
 
-# Function that applies non maximum suppression to
-# the list of bounding boxes to remove overlapping windows
+# Function that applies non maximum suppression to 
+# the list of bounding boxes to remove overlapping windows 
 # threshold parameter determines area of overlap given to
 # windows before they are suppressed
 def non_max_suppression(detections, threshold=0.5, score_threshold=0.7):
@@ -74,14 +72,14 @@ def non_max_suppression(detections, threshold=0.5, score_threshold=0.7):
 
     # Filter boxes with prediction probability > score_threshold
     detections = list(filter(lambda x: x[4] > score_threshold, detections))
-
+    
     # Sort by highest score
     detections = sorted(detections, key=lambda x: -x[4])
-
+    
     final_detections = []
     final_detections.append(detections[0])
     final_detections.pop(0)
-
+    
     for index, detection in enumerate(detections):
         for added_detection in final_detections:
             # Overlap over threshold
@@ -91,5 +89,5 @@ def non_max_suppression(detections, threshold=0.5, score_threshold=0.7):
         # Overlap below threshold
         final_detections.append(detection)
         detections.pop(index)
-
+    
     return final_detections
