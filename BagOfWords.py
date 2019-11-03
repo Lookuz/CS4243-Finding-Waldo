@@ -10,20 +10,28 @@ from scipy.spatial.distance import cdist
 
 from SlidingWindow import *
 
-KAZE_DESC_SIZE = 64
+descriptor_sizes = {
+    'kaze' : 64,
+    'sift' : 128,
+    'brisk': 64
+}
 
 # Function that extracts features as descriptors from the given image 
-# TODO: Currently uses KAZE descriptor. To add SIFT/SURF descriptor functionality
 # Set the limit parameter to false to take the full range of descriptors in the image
-def extract_feature(image, vector_size=64, limit=True):
-    kaze = cv2.KAZE_create()
-    # Identify keypoints
-    keypoints = kaze.detect(image)
-    # Take only the the most significant vector_size keypoints
-    keypoints = sorted(keypoints, key=lambda x: -x.response) # Larger response in front
-    keypoints = keypoints[:vector_size]
-    # Take descriptor around window of keypoints
-    keypoints, descriptor = kaze.compute(image, keypoints)
+# step and size parameters are used for SIFT descriptor
+def extract_feature(image, vector_size=64, step=3, size=4, desc_type='kaze'):
+    if desc_type == 'kaze':
+        # kaze = cv2.KAZE_create()
+        kaze = cv2.AKAZE_create()
+        # Compute keypoints and descriptors
+        keypoints, descriptor = kaze.detectAndCompute(image, None)
+    elif desc_type == 'sift':
+        sift = cv2.xfeatures2d.SIFT_create()
+        keypoints, descriptor = sift.detectAndCompute(image, None)
+    elif desc_type == 'brisk':
+        brisk = cv2.BRISK_create()
+        keypoints, descriptor = brisk.detectAndCompute(image, None)
+
     # Handle missing keypoints
     if descriptor is None or keypoints is None:
         return None, None
@@ -32,10 +40,11 @@ def extract_feature(image, vector_size=64, limit=True):
 
 # Extracts feature descriptors from a list of images. 
 # Runs the extract_feature function as a subroutine
-def extract_features(images, vector_size=64, mode='RGB'):
+def extract_features(images, mode='RGB', desc_type='kaze'):
+    vector_size = descriptor_sizes[desc_type]
     descriptors = np.array([]).reshape(0, vector_size)
     for image in images:
-        keypoints, descriptor = extract_feature(image, vector_size=vector_size)
+        keypoints, descriptor = extract_feature(image, vector_size=vector_size, desc_type=desc_type)
         if descriptor is not None:
             descriptors = np.concatenate((descriptors, descriptor), axis=0)
     
@@ -61,12 +70,12 @@ def extract_histogram(descriptors, bag_of_words, metric='euclidean'):
     return histogram
 
 # Function that extracts the binned histograms using the given bag of words
-def extract_histograms(images, bag_of_words, metric='euclidean'):
+def extract_histograms(images, bag_of_words, metric='euclidean', desc_type='kaze'):
     vocab_size = bag_of_words.shape[0]
     histograms = []
     
     for image in images:
-        _, descriptors = extract_feature(image, limit=False)
+        _, descriptors = extract_feature(image, desc_type=desc_type)
         if descriptors is None:
             histogram = np.zeros(vocab_size)
         else:
@@ -81,9 +90,10 @@ def extract_histograms(images, bag_of_words, metric='euclidean'):
 # and scores each window using the model supplied
 # Pyramidal scaling is also applied to apply sliding window over multiscale situations
 # window_size = (r, c)/ (y, x)
-def detect(image, bag_of_words, clf, step_size=250, window_size=(400, 200), scale=1.5, pyramid_window=(2000, 2000)):
+def detect(image, bag_of_words, clf, step_size=250, window_size=(400, 200), scale=1.5, desc_type='kaze'):
     detections = [] # To store detected window coordinates
     current_scale = 0
+    pyramid_window = (image.shape[1] // 4, image.shape[0] // 4)
     
     # Apply pyramidal sliding window
     for scaled_image in image_pyramid(image, scale=scale, minSize=pyramid_window):
@@ -99,9 +109,10 @@ def detect(image, bag_of_words, clf, step_size=250, window_size=(400, 200), scal
             # For this window, extract the descriptors then extract the histogram vector from descriptors
             # _, descriptors = extract_feature(window, limit=False)
             # feature_vector = extract_histogram(descriptors, bag_of_words)
-            feature_vector = extract_histograms([window], bag_of_words)
+            feature_vector = extract_histograms([window], bag_of_words, desc_type=desc_type)
             # Predict Waldo
             prediction = clf.predict(feature_vector)[0]
+            predict_score = clf.predict_proba(feature_vector)[0][1] # Get prediction probability
             if prediction == 1:
                 # Rescale coordinates
                 win_x = int(x * (scale ** current_scale))
@@ -111,11 +122,11 @@ def detect(image, bag_of_words, clf, step_size=250, window_size=(400, 200), scal
                 win_y_end = win_y + int(window_size[0] * (scale ** current_scale))
                 win_y_end = min(win_y_end, image.shape[0])
                 # Add bounding box
-                detections.append((win_x, win_y, win_x_end, win_y_end))
+                detections.append((win_x, win_y, win_x_end, win_y_end, predict_score))
                 
         current_scale += 1
     
     # Perform Non-Maximum Suppression
-    detections = non_max_suppression(np.array(detections), threshold=0.5)
+    detections = non_max_suppression(detections, threshold=0.3)
     
     return detections
