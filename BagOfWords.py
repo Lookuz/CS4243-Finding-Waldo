@@ -85,6 +85,20 @@ def extract_histograms(images, bag_of_words, metric='euclidean', desc_type='kaze
 
     return np.array(histograms)
 
+# Function that conslidates predictions from the model, or an ensemble of models
+# Uses a simple bagging structure for outputting the conslidated prediction
+def get_prediction(clf, feature_vector):
+    if type(clf) == list:
+        prediction = clf.predict(feature_vector)[0]
+        predict_score = clf.predict_proba(feature_vector)[0][1]
+    else:
+        predict_scores = predict_scores = [x.predict_proba(feature_vector)[0][1] for x in clf]
+        predict_score = sum(predict_scores) / len(predict_scores)
+        prediction = 1.0 if predict_score > 0.5 else 0.0
+
+    return prediction, predict_score
+
+
 # Functions that detects Waldo in the given image using window-based techniques
 # Performs a sliding window over each window on the image with size specified by window_size,
 # and scores each window using the model supplied
