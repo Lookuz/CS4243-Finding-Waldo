@@ -125,8 +125,40 @@ def detect(image, bag_of_words, clf, step_size=250, window_size=(400, 200), scal
                 detections.append((win_x, win_y, win_x_end, win_y_end, predict_score))
                 
         current_scale += 1
-    
+
     # Perform Non-Maximum Suppression
     detections = non_max_suppression(detections, threshold=0.3)
+
+    return detections
+
+
+# detect that need no vacobs provided
+def detect_with_clf(image, clf, step_size=250, window_size=(400, 200), scale=1.5, pyramid_window=(2000, 2000)):
+    detections = []  # To store detected window coordinates
+    current_scale = 0
+
+    # Apply pyramidal sliding window
+    for scaled_image in image_pyramid(image, scale=scale, minSize=pyramid_window):
+        # Resized image too small
+        if scaled_image.shape[0] < pyramid_window[1] or scaled_image.shape[1] < pyramid_window[0]:
+            break
+
+        for (coordinates, window) in sliding_window(scaled_image, step_size=step_size, window_size=window_size):
+            # if window.shape[0] != window_size[0] or window.shape[1] != window_size[1]:
+            #         continue
+            y, x, y_end, x_end = coordinates
+            predict_score = clf.predict_proba([window])[0][1]  # Get prediction probability
+            if predict_score > 0.5:
+                # Rescale coordinates
+                win_x = int(x * (scale ** current_scale))
+                win_y = int(y * (scale ** current_scale))
+                win_x_end = win_x + int(window_size[1] * (scale ** current_scale))
+                win_x_end = min(win_x_end, image.shape[1])
+                win_y_end = win_y + int(window_size[0] * (scale ** current_scale))
+                win_y_end = min(win_y_end, image.shape[0])
+                # Add bounding box
+                detections.append((win_x, win_y, win_x_end, win_y_end, predict_score))
+
+        current_scale += 1
     
     return detections

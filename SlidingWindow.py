@@ -90,4 +90,4 @@ def non_max_suppression(detections, threshold=0.5, score_threshold=0.7):
         final_detections.append(detection)
         detections.pop(index)
     
-    return final_detections            
+    return final_detections
