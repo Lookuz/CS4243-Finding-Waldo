@@ -10,9 +10,9 @@ import numpy as np
 import xml.etree.ElementTree as ET
 import json
 import shutil
+import random
 
 figure_classes = {'waldo', 'wenda', 'wizard'}
-extra_poses_classified = ['waldo']
 
 """"""" Image Loading and Preprocessing """""""
 def load_image(path):
@@ -36,10 +36,19 @@ def load_dir(dir):
     except:
         FileExistsError
 
+
 # Function that gets a list of file paths in the specified root directory
 def load_full_subdir(dir):
-    subdir = os.listdir(dir)
-    return list(map(lambda x: os.path.join(dir, x), subdir))
+    result = []
+    subdirs = os.listdir(dir)
+    for pth in subdirs:
+        full_path = os.path.join(dir, pth)
+        if os.path.isdir(full_path):
+            result += load_full_subdir(full_path)
+        else:
+            result.append(full_path)
+    return result
+
 
 # Function that removes specified directory
 # Directory specified is recommended to be full path
@@ -73,327 +82,390 @@ def clean_dir(dir):
 # Each image index to it's annotations
 # Annotations: (May be updated)
 # Bounding Box Coordinates
-def extract_annots(validation=False):
-    dataset_type = 'val' if validation else 'train'
-
-    # Extract annotations file paths
+def extract_provided_annots():
     goal_dir = os.getcwd()
-    annot_source_path = os.path.join(goal_dir, 'datasets', 'Annotations') # Default annotations
-    file_idx_path = os.path.join(goal_dir, 'datasets', 'ImageSets', f'{dataset_type}.txt')
-    annots_path = os.path.join(goal_dir, 'cache_anno', f'{dataset_type}_annots.pkl')
-    with open(file_idx_path, 'r') as fp:
-        annot_idxs = fp.readlines()
+    annot_source_path = os.path.join(goal_dir, 'datasets', 'Annotations')
 
-    annots_result = {} # Stores (image index : annotations)
-    # Iterate through each index in the train/validation set
-    for line in annot_idxs:
-        idx = line.strip()
-        annot = {}
+    # clean previous result
+    annots_desc_path = os.path.join(goal_dir, 'cache_anno', 'classification')
+    load_dir(annots_desc_path)
+    annots_path = os.path.join(annots_desc_path, 'provided_annots.pkl')
+    if os.path.exists(annots_path):
+        os.remove(annots_path)
 
-        # Load current indexed dataset
-        source_path = os.path.join(annot_source_path, f'{idx}.xml')
-        tree = ET.parse(source_path)
+    annots_result = {} # Stores (image index : [coord, label])
+    xml_paths = os.listdir(annot_source_path)
+    for pth in xml_paths:
+        img_name, suffix = pth.rsplit('.', 1)
+        if suffix != 'xml':
+            continue  # only process xml files
+
+        img_name = f'{img_name}.jpg'
+        pth = os.path.join(annot_source_path, pth)
+        annots_result[img_name] = []
+        tree = ET.parse(pth)
         root = tree.getroot()
 
         # Parse parameters in XML annotation file
         for obj in root.findall('object'):
-            name = obj.find('name').text
+            label = [obj.find('name').text]
             # Extract bounding box coordinates
             box = obj.find('bndbox')
-            annot[name] = [
+            coord = [
                 int(box.find('xmin').text),
                 int(box.find('ymin').text),
                 int(box.find('xmax').text),
                 int(box.find('ymax').text)]
-        annots_result[idx] = annot
+            annots_result[img_name].append([
+                coord, label])
     
     # Save the current annotations as pickled file
     with open(annots_path, 'wb') as fp:
         pickle.dump(annots_result, fp)
 
-# Function that extracts positive feature patches from the dataset
-# The positive feature patches are bounding boxes of images containing Waldo
-# To be used in feature extraction
-def save_provided_patches(validation=False):
-    dataset_type = 'val' if validation else 'train'
 
-    # Load file paths
+"""
+function to extract annotation from JSON
+"""
+def extract_extra_annots():
     goal_dir = os.getcwd()
-    annots_path = os.path.join(goal_dir, 'cache_anno', f'{dataset_type}_annots.pkl')
-    images_src_path = os.path.join(goal_dir, 'datasets', 'JPEGImages')
-    gt_des_path = os.path.join(goal_dir, 'datasets', dataset_type, 'positives')
-    load_dir(gt_des_path) # Create new path to store extracted feature patches
+    annots_path = os.path.join(goal_dir, 'datasets', 'Annotations')
+    face_annot_pth = os.path.join(annots_path, 'headshots.json')
+    body_annot_pth = os.path.join(annots_path, 'full_body.json')
+    waldo_pose_annot_pth = os.path.join(annots_path, 'waldo_poses.json')
 
-    des_map = {
-        'waldo': os.path.join(gt_des_path, 'waldo'),
-        'wenda': os.path.join(gt_des_path, 'wenda'),
-        'wizard': os.path.join(gt_des_path, 'wizard')
+    annots_desc_path = os.path.join(goal_dir, 'cache_anno', 'classification')
+    load_dir(annots_desc_path)
+    annots_desc_path = os.path.join(annots_desc_path, 'extra_annots.pkl')
+    if os.path.exists(annots_desc_path):
+        os.remove(annots_desc_path)
+
+    """
+    the structure of data:
+    waldo:
+    |__ face
+    |   |__front
+    |   |__side
+    |__ body
+        |__half
+        |__full
+    wenda:
+    wizard
+    """
+    with open(face_annot_pth) as fp:
+        face_annots = json.load(fp)
+    with open(body_annot_pth) as fp:
+        body_annots = json.load(fp)
+    with open(waldo_pose_annot_pth) as fp:
+        waldo_pose_annots = json.load(fp)
+
+    meta_data = {
+        'face': face_annots['_via_img_metadata'],
+        'body': body_annots['_via_img_metadata'],
+        'pose': waldo_pose_annots['_via_img_metadata'],
     }
-    file_idx_path = os.path.join(goal_dir, 'datasets', 'ImageSets', f'{dataset_type}.txt')
 
-    # Load saved annotations
-    if not os.path.exists(annots_path):
-        extract_annots(validation)
+    label_class = {
+        'face': 'classification',
+        'body': 'Body',
+        'pose': 'pose',
+    }
+
+    label_mapping = {
+        'waldo_body': ['waldo', 'body', 'full'],
+        'waldo_half_body': ['waldo', 'body', 'half'],
+        'wenda_body': ['wenda', 'body', 'full'],
+        'wenda_half_body': ['wenda', 'body', 'half'],
+        'wizard_body': ['wizard', 'body', 'full'],
+        'wizard_half_body': ['wizard', 'body', 'half'],
+        'false_body': ['other', 'body', 'full'],
+        'false_half_body': ['other', 'body', 'half'],
+        'waldo': ['waldo', 'face', 'front'],
+        'wenda': ['wenda', 'face', 'front'],
+        'wizard': ['wizard', 'face', 'front'],
+        'neg': ['other', 'face', 'front'],
+        'front': ['waldo', 'face', 'front'],
+        'tilt': ['waldo', 'face', 'front'],
+        'side': ['waldo', 'face', 'side'],
+    }
+
+    annots = {}
+
+    # classify the bounding boxes
+    # annotations are stored as
+    # [[x_min, y_min, x_max, y_max], [label]]
+    for k,v in meta_data.items():
+        label_type = label_class[k]
+        for img in v.values():
+            img_name = img['filename']
+            if img_name not in annots:
+                annots[img_name] = []
+
+            for region in img['regions']:
+                region_label = region['region_attributes'][label_type]
+                rect_info = region['shape_attributes']
+                x_min = rect_info['x']
+                y_min = rect_info['y']
+                x_max = x_min + rect_info['width']
+                y_max = y_min + rect_info['height']
+                coord = [x_min, y_min, x_max, y_max]
+                label = list(label_mapping[region_label])
+                annots[img_name].append([coord, label])
+
+    with open(annots_desc_path, 'wb') as fp:
+        pickle.dump(annots, fp)
+
+
+"""
+images preprocessing
+"""
+def preprocess_img(img):
+    result = []
+    result.append(img)
+    gaussian_smooth = cv2.GaussianBlur(img,(5,5),0)
+    result.append(gaussian_smooth)
+    grey_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    hist_smooth = cv2.equalizeHist(grey_img)
+    result.append(hist_smooth)
+    return [img]
+
+
+"""
+patches preprocessing and augmentation
+"""
+def preprocess_patch(imgs, xmin, ymin, xmax, ymax):
+    patches = []
+    for img in imgs:
+        patch = img[ymin:ymax, xmin:xmax]
+        patches.append(patch)
+        flip_patch = cv2.flip(patch, 1)
+        patches.append(flip_patch)
+    return patches
+
+
+"""
+load extra annotated patches
+if image list is provided (i.e.: ['001', '005', ...])
+only patches in the list will be saved
+"""
+def save_patches(img_lst=None, is_provided=True):
+    source_type = 'provided' if is_provided else 'extra'
+
+    goal_dir = os.getcwd()
+    annots_path = os.path.join(goal_dir, 'cache_anno', 'classification', f'{source_type}_annots.pkl')
+    images_src_path = os.path.join(goal_dir, 'datasets', 'JPEGImages')
+    images_dsc_path = os.path.join(goal_dir, 'datasets', 'classification', source_type)
+
+    if os.path.exists(images_dsc_path):
+        clean_dir(images_dsc_path)
+    load_dir(images_dsc_path)
+
     with open(annots_path, 'rb') as fp:
         annots = pickle.load(fp)
-    with open(file_idx_path, 'r') as fp:
-        img_idxs = fp.readlines()
-    for path in des_map.values():
-        load_dir(path)
 
-    gt_idx = 0
-    for line in img_idxs:
-        idx = line.strip()
-        img_path = os.path.join(images_src_path, f'{idx}.jpg')
-        img_data = cv2.imread(img_path)
-        annot = annots[idx]
-        for name, box in annot.items():
-            # Extract current bounding box as patch
-            patch = img_data[box[1]:box[3]+1, box[0]:box[2]+1]
-            save_path = os.path.join(des_map[name], f'gt_{gt_idx}.npy')
-            np.save(save_path, patch)
-            gt_idx += 1
+    for img_file_name, boxes in annots.items():
+        img_name = img_file_name.rsplit('.', 1)[0]
+        if img_lst and img_name not in img_lst:
+            continue
 
-# NOTE: Image 1 in the dataset contains various poses and angles of Waldo
-# Function extracts various poses of Waldo from this image
-def save_poses():
-    # Extract Waldo from different images in image 1
+        img_src_path = os.path.join(images_src_path, img_file_name)
+        img_data = cv2.imread(img_src_path)
+        imgs = preprocess_img(img_data)
+
+        for idx, box in enumerate(boxes):
+            coord, label = box
+            patches = preprocess_patch(imgs, *coord)
+
+            dsc_path = os.path.join(images_dsc_path, *label)
+            load_dir(dsc_path)
+            for i, patch in enumerate(patches):
+                result_file_name = f'{img_name}_{idx}_{i}.npy'
+                result_path = os.path.join(dsc_path, result_file_name)
+                np.save(result_path, patch)
+
+
+"""
+load random patches from list images
+img_lst: ['001', '005', ...]
+"""
+def save_random_patches(img_lst, num_per_img):
+    # image 001, 004, 006, 032, 043, 048, 068 should not be used
+    bad_sources = ['001', '004', '006', '032', '043', '048', '068']
+
     goal_dir = os.getcwd()
     images_src_path = os.path.join(goal_dir, 'datasets', 'JPEGImages')
+    images_dsc_path = os.path.join(goal_dir, 'datasets', 'classification', 'random')
 
-    for class_name in extra_poses_classified:
-        # Load file path for saving extra poses
-        annots_path = os.path.join(goal_dir, 'datasets', 'Annotations', f'{class_name}_poses.json')
-        gt_des_path = os.path.join(goal_dir, 'datasets', f'{class_name}_extra')
-        load_dir(gt_des_path)
+    load_dir(images_dsc_path)
+    clean_dir(images_dsc_path)
 
-        # TODO: Is extract annots supposed to produce json file?
-        if not os.path.isfile(annots_path):
-            extract_annots()
-        with open(annots_path) as fp:
-            pose_annots = json.load(fp)
-
-        des_map = {
-            'front': os.path.join(gt_des_path, 'front'),
-            'side': os.path.join(gt_des_path, 'side'),
-            'tilt': os.path.join(gt_des_path, 'tilt')
-        }
-
-        pos_idx = 0
-        meta_data = pose_annots['_via_img_metadata']
-        # Create file path for each pose
-        for path in des_map.values():
-            load_dir(path)
-        
-        # Save different poses for Waldo
-        for img_src in meta_data.values():
-            bndboxes = img_src['regions']
-            img_data = cv2.imread(os.path.join(images_src_path, img_src['filename']))
-            for box in bndboxes:
-                box_rect_info = box['shape_attributes']
-                x_min = box_rect_info['x']
-                y_min = box_rect_info['y']
-                x_max = x_min + box_rect_info['width']
-                y_max = y_min + box_rect_info['height']
-                patch_data = img_data[y_min:y_max, x_min:x_max]
-                label = box['region_attributes']['pose']
-                save_path = os.path.join(des_map[label], f'{class_name}_{pos_idx}.npy')
-                np.save(save_path, patch_data)
-                pos_idx += 1
-
-
-def save_extra_patches():
-    goal_dir = os.getcwd()
-    annots_path = os.path.join(goal_dir, 'datasets', 'Annotations', 'headshot_candidates.json')
-    images_src_path = os.path.join(goal_dir, 'datasets', 'JPEGImages')
-    gt_des_path = os.path.join(goal_dir, 'datasets', 'extra', 'positives')
-    cf_des_path = os.path.join(goal_dir, 'datasets', 'extra', 'confusion')
-    load_dir(gt_des_path)
-    load_dir(cf_des_path)
-    with open(annots_path) as fp:
-        examples_annots = json.load(fp)
-    meta_data = examples_annots['_via_img_metadata']
-
-    labels = ['waldo', 'wenda', 'wizard', 'close', 'close_wizard', 'face', 'neg']
-    des_map = {
-        'waldo': os.path.join(gt_des_path, 'waldo'),
-        'wenda': os.path.join(gt_des_path, 'wenda'),
-        'wizard': os.path.join(gt_des_path, 'wizard'),
-        'close': os.path.join(cf_des_path, 'waldo_wenda'),
-        'close_wizard': os.path.join(cf_des_path, 'wizard'),
-        'face': os.path.join(cf_des_path, 'waldo_wenda'),
-        'neg': os.path.join(cf_des_path, 'waldo_wenda'),
+    scale_factor = {
+        'face': (1.0, 1.0),
+        'half': (1.5, 1.0),
+        'full': (2.0, 1.5),
     }
 
-    example_id = 0
-    for path in des_map.values():
-        load_dir(path)
-    for img_src in meta_data.values():
-        bndboxes = img_src['regions']
-        img_data = cv2.imread(os.path.join(images_src_path, img_src['filename']))
-        for box in bndboxes:
-            box_rect_info = box['shape_attributes']
-            x_min = box_rect_info['x']
-            y_min = box_rect_info['y']
-            x_max = x_min + box_rect_info['width']
-            y_max = y_min + box_rect_info['height']
-            patch_data = img_data[y_min:y_max, x_min:x_max]
-            label = box['region_attributes']['classification']
-            if label in labels:
-                save_path = os.path.join(des_map[label], f'extra_{example_id}.npy')
-                np.save(save_path, patch_data)
-                example_id += 1
+    for img_name in img_lst:
+        # DONNOT load from these images
+        if img_name in bad_sources:
+            continue
 
-# Returns the file paths for the positive data for both training and validation sets
-# Returns the datasets in the form of tuple of lists
-def positive_source(name):
-    goal_dir = os.getcwd()
-    # Loads dataset depending on the name of object to be detected
-    train_img_src = os.path.join(goal_dir, 'datasets', 'train', 'positives', name)
-    val_img_src = os.path.join(goal_dir, 'datasets', 'val', 'positives', name)
-    extra_img_src = os.path.join(goal_dir, 'datasets', 'extra', 'positives', name)
+        img_file_name = f'{img_name}.jpg'
+        img_src_path = os.path.join(images_src_path, img_file_name)
+        img_data = cv2.imread(img_src_path)
+        imgs = preprocess_img(img_data)
+        im_h, im_w, _ = img_data.shape
 
-    train_srcs = load_full_subdir(train_img_src)
-    val_srcs = load_full_subdir(val_img_src)
-    extra_srcs = load_full_subdir(extra_img_src)
+        for k, v in scale_factor.items():
+            folder_pth = os.path.join(images_dsc_path, k)
+            load_dir(folder_pth)
+            x = np.random.randint(0, im_w - 150, num_per_img)
+            y = np.random.randint(0, im_h - 300, num_per_img)
+            widths = np.random.randint(40, 150, num_per_img)
+            ratio = v[0] + np.random.random(num_per_img) * v[1]
+            heights = np.multiply(widths, ratio).astype(int)
 
-    extra_pose_path = os.path.join(goal_dir, 'datasets', f'{name}_extra')
-    if os.path.exists(extra_pose_path):
-        srcs = []
-        for dir in load_full_subdir(extra_pose_path):
-            srcs.extend(load_full_subdir(dir))
-        extra_srcs.extend(srcs)
-
-    return train_srcs, val_srcs, extra_srcs
-
-# Returns the file paths for the negative data for both training and validation sets
-# Returns the datasets in the form of tuple of lists
-def negative_source(name, tuning=False):
-    train_srcs = []
-    val_srcs = []
-    extra_srcs = []
-
-    for class_name in figure_classes - {name}:
-        t, v, e = positive_source(class_name)
-        train_srcs.extend(t)
-        val_srcs.extend(v)
-        extra_srcs.extend(e)
-
-    if tuning:
-        goal_dir = os.getcwd()
-        confusion_name = 'wizard' if name is 'wizard' else 'waldo_wenda'
-        confusion_path = os.path.join(goal_dir, 'datasets', 'extra', 'confusion', confusion_name)
-        extra_srcs.extend(load_full_subdir(confusion_path))
-
-    return train_srcs, val_srcs, extra_srcs
+            for idx in range(num_per_img):
+                patches = preprocess_patch(imgs, x[idx], y[idx],
+                                           x[idx]+widths[idx], y[idx]+heights[idx])
+                for i, patch in enumerate(patches):
+                    result_file_name = f'{img_name}_{idx}_{i}.npy'
+                    result_path = os.path.join(folder_pth, result_file_name)
+                    np.save(result_path, patch)
 
 
-# Loads image sets with positive labels from given dataset source paths
-# Source paths can be loaded from the positive_source function
-def positive_loader(srcs):
-    for img_path in srcs:
-        yield np.load(img_path)
+# Loads image from the provided paths list
+def data_loader(instances):
+    for instance in instances:
+        img_path, label = instance
+        yield np.load(img_path), label
 
-# Loads image sets with negative labels from given dataset source paths
-# Source paths can be loaded from the negative_source function
-def negative_loader(srcs, rand_num=3):
-    for img_path in srcs:
-        yield np.load(img_path)
-    for img_patch in load_random_patch(rand_num):
-        yield img_patch
 
+"""
+    Prepare the datasets
+    
+    Params:
+    =======
+    img_lst:
+        only images in the the list will be loaded 
+        into the dataset
+    clean:
+        whether to clean the previous dataset
+    num_random:
+        number of random patches generated
+        from every image
+
+"""
 # Function that extracts and preprocesses the given dataset
 # If clean=True is specified, then existing files will be deleted
 # before the preprocessed files are added again. This is to allow for a
 # fresh re-loading of data
-def prepare_dataset(clean=False):
+def prepare_classification_dataset(img_lst, clean=True, num_random=20):
     curr_wd = os.getcwd()
 
     # Extract Annotations
-    annot_source_path = os.path.join(curr_wd, 'cache_anno')
-    assert os.path.exist(annot_source_path)
+    annot_source_path = os.path.join(curr_wd, 'cache_anno', 'classification')
+    assert os.path.exists(annot_source_path)
     if clean:
         clean_dir(annot_source_path)
-    annot_source_path_train = os.path.join(annot_source_path, 'train_annots.pkl')
-    annot_source_path_val = os.path.join(annot_source_path, 'val_annots.pkl')
-    if not os.path.exists(annot_source_path_train):
-        extract_annots(validation=False)
-    if not os.path.exists(annot_source_path_val):
-        extract_annots(validation=True)
+    provided_annot_source_path = os.path.join(annot_source_path, 'provided_annots.pkl')
+    extra_annot_source_path = os.path.join(annot_source_path, 'extra_annots.pkl')
+    if not os.path.exists(provided_annot_source_path):
+        extract_provided_annots()
+    if not os.path.exists(extra_annot_source_path):
+        extract_extra_annots()
 
-    # Extract Window Patches
-    patch_source_path = os.path.join(curr_wd, 'datasets')
-    assert os.path.exist(patch_source_path)
-    patch_source_path_train = os.path.join(patch_source_path, 'train')
-    patch_source_path_val = os.path.join(patch_source_path, 'val')
+    # Extract provided Window Patches
+    patch_source_path = os.path.join(curr_wd, 'datasets', 'classification')
     if clean:
-        del_dir(patch_source_path_train)
-        del_dir(patch_source_path_val)
-    if not os.path.exists(patch_source_path_train):
-        save_provided_patches(validation=False)
-    if not os.path.exists(patch_source_path_val):
-        save_provided_patches(validation=True)
+        del_dir(patch_source_path)
+    if not os.path.exists(patch_source_path):
+        save_patches(img_lst, is_provided=True)
+        save_patches(img_lst, is_provided=False)
+        save_random_patches(img_lst=img_lst, num_per_img=num_random)
 
-    pose_source_path = os.path.join(curr_wd, 'datasets', 'waldo_extra')
-    if clean:
-        del_dir(pose_source_path)
-    if not os.path.exists(pose_source_path):
-        save_poses()
 
-    extra_poses_positive_path = os.path.join(curr_wd, 'datasets', 'extra', 'positives')
-    extra_poses_confusion_path = os.path.join(curr_wd, 'datasets', 'extra', 'confusion')
-    if clean:
-        del_dir(extra_poses_positive_path)
-        del_dir(extra_poses_confusion_path)
-    if not os.path.exists(extra_poses_confusion_path) or not os.path.exists(extra_poses_positive_path):
-        save_extra_patches()
+"""
+    Prepares the training and validation dataset
+    
+    Parameters:
+    ==========
+    pos_classes:
+        list of labels treated as positive examples
+        each class name
+        (   
+            1 of ['waldo', 'wenda', 'wizard', 'other']
+          + 1 of [['face'] + 1 of ['front', 'side']
+                  ['body'] + 1 of ['half', 'full']]
+        )
+        example: 'waldo_face_front'
+    simple:
+        If the mode is set as simple, neg_classes will be ignored
+        and random patches will be used as default negative.
+        Otherwise, neg_classes will be used
+    neg_ratio:
+        control the number of negative examples.
+        neg_ratio * 20 is the number of random patches be loaded
+        if the mode is set to simple
+    valid_ratio:
+        ratio of data used for validation.
 
-""""""""""""""""""""""""""""""""""""""""""""""""
-
-def load_random_patch(num_per_img):
-    # image 001, 004, 006, 032, 043, 048, 068 not used
+    Usage:
+    =====
+        prepare_classification_dataloader(
+            pos_classes=['waldo_face_front', 'wenda_face_front'],
+            neg_classes=['other_face_front'],
+            simple=False, neg_ratio=0.7, valid_ratio=0.2)
+            
+    Return:
+    ======
+        return dataloaders for training and validation
+"""
+def prepare_classification_dataloader(pos_classes, neg_classes=None, simple=True,
+                                      neg_ratio=1.0, valid_ratio=0.2):
     goal_dir = os.getcwd()
-    images_src_path = os.path.join(goal_dir, 'datasets', 'JPEGImages')
-    train_file_idx_path = os.path.join(goal_dir, 'datasets', 'ImageSets', 'good_train.txt')
-    with open(train_file_idx_path, 'r') as fp:
-        img_idxs = fp.readlines()
-    for line in img_idxs:
-        idx = line.strip()
-        img_path = os.path.join(images_src_path, f'{idx}.jpg')
-        img_data = cv2.imread(img_path)
-        im_h, im_w, _ = img_data.shape
-        x = np.random.randint(0, im_w - 100, )
-        y = np.random.randint(0, im_h - 200)
-        widths = np.random.randint(40, 100, num_per_img)
-        ratio = 1 + np.random.random(num_per_img)
-        heights= np.multiply(widths, ratio).astype(int)
-        for idx in range(num_per_img):
-            patch = img_data[y:y+heights[idx],
-                             x:x+widths[idx]]
-            yield patch
+    instances = []
+    random_types = []
 
-"""
-For use with classification.py
-Author: Yang Si Han
-"""
-# Prepares the training and validation dataset by loading 
-# The images from the positive and negative datasets
-def prepare_dataloader(class_name, tuning=False, val_propotion=0.2):
-    # return positive training loader
-    # return positive validation loader
-    # return negative training loader
-    # return negative validation loader
-    pos_train, pos_val, pos_extra = positive_source(class_name)
-    neg_train, neg_val, neg_extra = negative_source(class_name, tuning=tuning)
+    for class_name in pos_classes:
+        sub_route = class_name.split('_')
+        assert len(sub_route) == 3
+        new_rnd_type = sub_route[1] if sub_route[1] == 'face' else sub_route[2]
+        if new_rnd_type not in random_types:
+            random_types.append(new_rnd_type)
 
-    np.random.shuffle(pos_extra)
-    np.random.shuffle(neg_extra)
-    num_extra_pos_val = int(len(pos_extra)*val_propotion)
-    num_extra_neg_val = int(len(neg_extra)*val_propotion)
-    pos_val.extend(pos_extra[:num_extra_pos_val])
-    pos_train.extend(pos_extra[num_extra_pos_val:])
-    neg_val.extend(neg_extra[:num_extra_neg_val])
-    neg_train.extend(neg_extra[num_extra_neg_val:])
+        patch_folder_pth = os.path.join(goal_dir, 'datasets', 'classification', 'extra', *sub_route)
+        patch_dirs = load_full_subdir(patch_folder_pth)
+        for patch_dir in patch_dirs:
+            instance = [patch_dir, 1]
+            instances.append(instance)
 
-    return positive_loader(pos_train), positive_loader(pos_val), \
-           negative_loader(neg_train), negative_loader(neg_val)
+    if simple or not neg_classes:
+        neg_patch_folder_pths = [os.path.join(goal_dir, 'datasets', 'classification', 'random', rnd_type)
+                                 for rnd_type in random_types]
+    else:
+        neg_patch_folder_pths = [os.path.join(goal_dir, 'datasets', 'classification', 'extra', cls_type)
+                                 for cls_type in neg_classes]
+
+    for neg_patch_folder_pth in neg_patch_folder_pths:
+        neg_instances = []
+        neg_patch_dirs = load_full_subdir(neg_patch_folder_pth)
+        for neg_patch_dir in neg_patch_dirs:
+            instance = [neg_patch_dir, 0]
+            neg_instances.append(instance)
+        num_neg_instance = len(neg_instances)
+        num_neg_instance = int(num_neg_instance * neg_ratio)
+        random.shuffle(neg_instances)
+        instances += neg_instances[:num_neg_instance]
+
+    num_instance = len(instances)
+    num_validation = int(num_instance * valid_ratio)
+    random.shuffle(instances)
+
+    print(f"---num of training instances: {num_instance - num_validation}")
+    print(f"---num of validation instances: {num_validation}")
+
+    return data_loader(instances[num_validation:]), \
+           data_loader(instances[:num_validation])
+
+
