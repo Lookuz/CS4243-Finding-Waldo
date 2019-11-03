@@ -217,6 +217,13 @@ def extract_extra_annots():
 images preprocessing
 """
 def preprocess_img(img):
+    result = []
+    result.append(img)
+    gaussian_smooth = cv2.GaussianBlur(img,(5,5),0)
+    result.append(gaussian_smooth)
+    grey_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    hist_smooth = cv2.equalizeHist(grey_img)
+    result.append(hist_smooth)
     return [img]
 
 
@@ -228,6 +235,8 @@ def preprocess_patch(imgs, xmin, ymin, xmax, ymax):
     for img in imgs:
         patch = img[ymin:ymax, xmin:xmax]
         patches.append(patch)
+        flip_patch = cv2.flip(patch, 1)
+        patches.append(flip_patch)
     return patches
 
 
@@ -353,8 +362,8 @@ def prepare_classification_dataset(img_lst, clean=True, num_random=20):
     if clean:
         del_dir(patch_source_path)
     if not os.path.exists(patch_source_path):
-        save_patches(is_provided=True)
-        save_patches(is_provided=False)
+        save_patches(img_lst, is_provided=True)
+        save_patches(img_lst, is_provided=False)
         save_random_patches(img_lst=img_lst, num_per_img=num_random)
 
 
@@ -382,8 +391,9 @@ def prepare_classification_dataloader(pos_classes, neg_classes=None, simple=True
     for class_name in pos_classes:
         sub_route = class_name.split('_')
         assert len(sub_route) == 3
-        if sub_route[1] not in random_types:
-            random_types.append(sub_route[1])
+        new_rnd_type = sub_route[1] if sub_route[1] == 'face' else sub_route[2]
+        if new_rnd_type not in random_types:
+            random_types.append(new_rnd_type)
 
         patch_folder_pth = os.path.join(goal_dir, 'datasets', 'classification', 'extra', *sub_route)
         patch_dirs = load_full_subdir(patch_folder_pth)

@@ -94,7 +94,7 @@ class Classifier:
         valid_images, valid_labels = zip(*self.valid_instances)
         valid_feats = self.load_feats(valid_images)
 
-        self.clf = SVC(gamma=gamma, kernel=kernel)
+        self.clf = SVC(gamma=gamma, kernel=kernel, probability=True)
         self.clf.fit(train_feats, train_labels)
 
         print('--- predicting the validation set labels')
@@ -112,5 +112,11 @@ class Classifier:
         feats = self.load_feats(X)
         return self.clf.predict(feats)
 
+
+    def predict_proba(self, X):
+        if not self.trained:
+            print(f'use default paramters to train')
+        feats = self.load_feats(X)
+        return self.clf.predict_proba(feats)
 
 
