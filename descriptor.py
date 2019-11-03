@@ -9,7 +9,7 @@ import numpy as np
 import cv2 as cv
 import cyvlfeat as vlfeat
 
-def color(im):
+def color(im, **kwargs):
     hsv_im = cv.cvtColor(im, cv.COLOR_BGR2HSV)[:, :, 0]
     hist = cv.calcHist(hsv_im, channels=[0], mask=None, histSize=[256], ranges=[0, 256])
     hist /= np.linalg(hist)
@@ -20,4 +20,15 @@ def sift(im, **kwargs):
     size = kwargs.get('size', 4)
     grey_im = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
     _, descriptors = vlfeat.sift.dsift(grey_im, fast=True, step=step, size=size)
+    return descriptors
+
+def surf(im, **kwargs):
+    DSP_OBJ = kwargs.get('DSP_OBJ')
+    _, descriptors = DSP_OBJ.detectAndCompute(im, None)
+    return descriptors
+
+
+def akaze(im, **kwargs):
+    DSP_OBJ = kwargs.get('DSP_OBJ')
+    _, descriptors = DSP_OBJ.detectAndCompute(im, None)
     return descriptors
