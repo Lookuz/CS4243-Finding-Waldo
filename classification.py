@@ -18,7 +18,13 @@ descriptor_size = {
     'akaze': 61
 }
 
-
+"""
+    params:
+    method: 'sift', 'surf', 'akaze'
+    pos_classes: positive classes labels (ref: prepare_classification_dataloader)
+    neg_classes: negative classes labels (ref: prepare_classification_dataloader)
+    
+"""
 class Classifier:
     def __init__(self, method, pos_classes, neg_classes=None,
                  simple=True, neg_ratio=1.0, valid_ratio=0.2, **kwargs):

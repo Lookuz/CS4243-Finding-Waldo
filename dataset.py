@@ -338,6 +338,21 @@ def data_loader(instances):
         yield np.load(img_path), label
 
 
+"""
+    Prepare the datasets
+    
+    Params:
+    =======
+    img_lst:
+        only images in the the list will be loaded 
+        into the dataset
+    clean:
+        whether to clean the previous dataset
+    num_random:
+        number of random patches generated
+        from every image
+
+"""
 # Function that extracts and preprocesses the given dataset
 # If clean=True is specified, then existing files will be deleted
 # before the preprocessed files are added again. This is to allow for a
@@ -368,19 +383,40 @@ def prepare_classification_dataset(img_lst, clean=True, num_random=20):
 
 
 """
-Prepares the training and validation dataset
-each class name
-(   
-    1 of ['waldo', 'wenda', 'wizard', 'other']
-  + 1 of [['face'] + 1 of ['front', 'side']
-          ['body'] + 1 of ['half', 'full']]
-)
-example: 'waldo_face_front'
-class names is a list of class name
-If the mode is set as simple, random patches will be used as default negative
-neg_ratio control the number of negative examples
-classes in pos_classes will be used as positive examples
-classes in neg_classes will be used as negative examples
+    Prepares the training and validation dataset
+    
+    Parameters:
+    ==========
+    pos_classes:
+        list of labels treated as positive examples
+        each class name
+        (   
+            1 of ['waldo', 'wenda', 'wizard', 'other']
+          + 1 of [['face'] + 1 of ['front', 'side']
+                  ['body'] + 1 of ['half', 'full']]
+        )
+        example: 'waldo_face_front'
+    simple:
+        If the mode is set as simple, neg_classes will be ignored
+        and random patches will be used as default negative.
+        Otherwise, neg_classes will be used
+    neg_ratio:
+        control the number of negative examples.
+        neg_ratio * 20 is the number of random patches be loaded
+        if the mode is set to simple
+    valid_ratio:
+        ratio of data used for validation.
+
+    Usage:
+    =====
+        prepare_classification_dataloader(
+            pos_classes=['waldo_face_front', 'wenda_face_front'],
+            neg_classes=['other_face_front'],
+            simple=False, neg_ratio=0.7, valid_ratio=0.2)
+            
+    Return:
+    ======
+        return dataloaders for training and validation
 """
 def prepare_classification_dataloader(pos_classes, neg_classes=None, simple=True,
                                       neg_ratio=1.0, valid_ratio=0.2):
