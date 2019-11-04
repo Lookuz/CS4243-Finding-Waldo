@@ -14,6 +14,12 @@ def image_pyramid(image, scale=1.5, minSize=(100, 100)):
 
         yield image
 
+# Function that scales the window
+def window_pyramid(window, scale=2):
+    for i in range(scale + 1):
+        yield (window[0] * (2 ** i), window[1] * (2 ** i))
+
+
 # Sliding window subroutine that slides a window of 
 # window_size and skips step_size pixels every iteration over the image
 # window_size = (r, c) of the window to slide over
@@ -66,12 +72,12 @@ def calculate_iou(box_1, box_2):
 # threshold parameter determines area of overlap given to
 # windows before they are suppressed
 def non_max_suppression(detections, threshold=0.5, score_threshold=0.7):
+    # Filter boxes with prediction probability > score_threshold
+    detections = list(filter(lambda x: x[4] > score_threshold, detections))
+
     # No detections
     if detections is None or len(detections) == 0:
         return []
-
-    # Filter boxes with prediction probability > score_threshold
-    detections = list(filter(lambda x: x[4] > score_threshold, detections))
     
     # Sort by highest score
     detections = sorted(detections, key=lambda x: -x[4])

@@ -110,7 +110,7 @@ def get_prediction(clf, feature_vector):
 # and scores each window using the model supplied
 # Pyramidal scaling is also applied to apply sliding window over multiscale situations
 # window_size = (r, c)/ (y, x)
-def detect(image, bag_of_words, clf, window_scale=4, scale=1.5, desc_type='kaze'):
+def detect(image, bag_of_words, clf, window_scale=4, scale=2, desc_type='kaze'):
     detections = [] # To store detected window coordinates
     current_scale = 0
     pyramid_window = (image.shape[1] // 4, image.shape[0] // 4)
@@ -118,12 +118,14 @@ def detect(image, bag_of_words, clf, window_scale=4, scale=1.5, desc_type='kaze'
     step_size = min(window_size[0] // 2, window_size[1] // 2)
     
     # Apply pyramidal sliding window
-    for scaled_image in image_pyramid(image, scale=scale, minSize=pyramid_window):
-        # Resized image too small
-        if scaled_image.shape[0] < pyramid_window[1] or scaled_image.shape[1] < pyramid_window[0]:
-            break
+    for scaled_window in window_pyramid(window_size, scale=2):
+        print('Current Window Size: ', scaled_window[0], scaled_window[1])
+        print('Current step size: ', step_size)
+        # Resized window too big
+        # if scaled_window[0] < pyramid_window[1] or scaled_window[1] < pyramid_window[0]:
+        #     break
         
-        for (coordinates, window) in sliding_window(scaled_image, step_size=step_size, window_size=window_size):
+        for (coordinates, window) in sliding_window(image, step_size=step_size, window_size=scaled_window):
             # if window.shape[0] != window_size[0] or window.shape[1] != window_size[1]:
             #         continue
             y, x, y_end, x_end = coordinates
@@ -139,19 +141,21 @@ def detect(image, bag_of_words, clf, window_scale=4, scale=1.5, desc_type='kaze'
             
             if prediction == 1:
                 # Rescale coordinates
-                win_x = int(x * (scale ** current_scale))
-                win_y = int(y * (scale ** current_scale))
-                win_x_end = win_x + int(window_size[1] * (scale ** current_scale))
-                win_x_end = min(win_x_end, image.shape[1])
-                win_y_end = win_y + int(window_size[0] * (scale ** current_scale))
-                win_y_end = min(win_y_end, image.shape[0])
+                # win_x = int(x * (scale ** current_scale))
+                # win_y = int(y * (scale ** current_scale))
+                # win_x_end = win_x + int(window_size[1] * (scale ** current_scale))
+                # win_x_end = min(win_x_end, image.shape[1])
+                # win_y_end = win_y + int(window_size[0] * (scale ** current_scale))
+                # win_y_end = min(win_y_end, image.shape[0])
                 # Add bounding box
-                detections.append((win_x, win_y, win_x_end, win_y_end, predict_score))
+                detections.append((x, y, x_end, y_end, predict_score))
                 
         current_scale += 1
+        step_size = step_size * (2 ** current_scale)
+
 
     # Perform Non-Maximum Suppression
-    detections = non_max_suppression(detections, threshold=0.1, score_threshold=0.7)
+    detections = non_max_suppression(detections, threshold=0.1, score_threshold=0.6)
 
     return detections
 
