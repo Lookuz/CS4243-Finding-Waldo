@@ -95,12 +95,12 @@ def extract_histograms(images, bag_of_words, metric='euclidean', desc_type='kaze
 # Uses a simple bagging structure for outputting the conslidated prediction
 def get_prediction(clf, feature_vector):
     if type(clf) == list:
-        prediction = clf.predict(feature_vector)[0]
-        predict_score = clf.predict_proba(feature_vector)[0][1]
-    else:
-        predict_scores = predict_scores = [x.predict_proba(feature_vector)[0][1] for x in clf]
+        predict_scores = [x.predict_proba(feature_vector)[0][1] for x in clf]
         predict_score = sum(predict_scores) / len(predict_scores)
         prediction = 1.0 if predict_score > 0.5 else 0.0
+    else:
+        prediction = clf.predict(feature_vector)[0]
+        predict_score = clf.predict_proba(feature_vector)[0][1]
 
     return prediction, predict_score
 
@@ -110,10 +110,11 @@ def get_prediction(clf, feature_vector):
 # and scores each window using the model supplied
 # Pyramidal scaling is also applied to apply sliding window over multiscale situations
 # window_size = (r, c)/ (y, x)
-def detect(image, bag_of_words, clf, step_size=250, window_size=(400, 200), scale=1.5, desc_type='kaze'):
+def detect(image, bag_of_words, clf, step_size=250, window_scale=4, scale=1.5, desc_type='kaze'):
     detections = [] # To store detected window coordinates
     current_scale = 0
     pyramid_window = (image.shape[1] // 4, image.shape[0] // 4)
+    window_size = (image.shape[1] // 2**window_scale, image.shape[0] // 2**window_scale)
     
     # Apply pyramidal sliding window
     for scaled_image in image_pyramid(image, scale=scale, minSize=pyramid_window):
@@ -127,12 +128,14 @@ def detect(image, bag_of_words, clf, step_size=250, window_size=(400, 200), scal
             y, x, y_end, x_end = coordinates
 
             # For this window, extract the descriptors then extract the histogram vector from descriptors
-            # _, descriptors = extract_feature(window, limit=False)
-            # feature_vector = extract_histogram(descriptors, bag_of_words)
             feature_vector = extract_histograms([window], bag_of_words, desc_type=desc_type)
-            # Predict Waldo
-            prediction = clf.predict(feature_vector)[0]
-            predict_score = clf.predict_proba(feature_vector)[0][1] # Get prediction probability
+            # Single Prediction
+            # prediction = clf.predict(feature_vector)[0]
+            # predict_score = clf.predict_proba(feature_vector)[0][1] # Get prediction probability
+            
+            # Stacked Prediction
+            prediction, predict_score = get_prediction(clf, feature_vector)
+            
             if prediction == 1:
                 # Rescale coordinates
                 win_x = int(x * (scale ** current_scale))
@@ -147,7 +150,7 @@ def detect(image, bag_of_words, clf, step_size=250, window_size=(400, 200), scal
         current_scale += 1
 
     # Perform Non-Maximum Suppression
-    detections = non_max_suppression(detections, threshold=0.3)
+    detections = non_max_suppression(detections, threshold=0.2, score_threshold=0.6)
 
     return detections
 
