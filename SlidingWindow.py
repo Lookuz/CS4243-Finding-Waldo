@@ -78,16 +78,20 @@ def non_max_suppression(detections, threshold=0.5, score_threshold=0.7):
     
     final_detections = []
     final_detections.append(detections[0])
-    final_detections.pop(0)
+    detections.pop(0)
     
     for index, detection in enumerate(detections):
+        overlap = False
+        
         for added_detection in final_detections:
             # Overlap over threshold
             if calculate_iou(detection, added_detection) > threshold:
-                final_detections.pop(0)
+                overlap = True
                 break
         # Overlap below threshold
-        final_detections.append(detection)
+        if not overlap:
+            final_detections.append(detection)
+            
         detections.pop(index)
     
     return final_detections

@@ -14,6 +14,8 @@ import random
 
 figure_classes = {'waldo', 'wenda', 'wizard'}
 
+model_file_path = 'datasets/models/' # Default file path for saving classifiers
+
 """"""" Image Loading and Preprocessing """""""
 def load_image(path):
     im = cv2.imread(path)
@@ -468,4 +470,12 @@ def prepare_classification_dataloader(pos_classes, neg_classes=None, simple=True
     return data_loader(instances[num_validation:]), \
            data_loader(instances[:num_validation])
 
+# Function that extracts the training examples and labels
+# from the provided training_instances
+# Crafted to be used in conjunction with prepare_classification_loader
+# which loads the training_instances
+def extract_data(data):
+    examples = [x[0] for x in data] # Extract examples
+    labels = [x[1] for x in data] # Extract labels
 
+    return examples, labels
