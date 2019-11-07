@@ -229,7 +229,7 @@ def preprocess_img(img):
     grey_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     hist_smooth = cv2.equalizeHist(grey_img)
     result.append(hist_smooth)
-    return [img]
+    return result
 
 
 """
@@ -446,7 +446,7 @@ def prepare_classification_dataloader(pos_classes, neg_classes=None, simple=True
         neg_patch_folder_pths = [os.path.join(goal_dir, 'datasets', 'classification', 'random', rnd_type)
                                  for rnd_type in random_types]
     else:
-        neg_patch_folder_pths = [os.path.join(goal_dir, 'datasets', 'classification', 'extra', cls_type)
+        neg_patch_folder_pths = [os.path.join(goal_dir, 'datasets', 'classification', 'extra', *(cls_type.split('_')))
                                  for cls_type in neg_classes]
 
     for neg_patch_folder_pth in neg_patch_folder_pths:
