@@ -475,7 +475,7 @@ def prepare_classification_dataloader(pos_classes, neg_classes=None, simple=True
 # Crafted to be used in conjunction with prepare_classification_loader
 # which loads the training_instances
 def extract_data(data):
-    examples = [cv2.cvtColor(x[0], cv2.COLOR_BGR2RGB) for x in data] # Extract examples
+    examples = [cv2.cvtColor(x[0].astype('uint8'), cv2.COLOR_BGR2RGB) if len(x[0].shape) == 3 else x[0] for x in data] # Extract examples
     labels = [x[1] for x in data] # Extract labels
 
     return examples, labels
