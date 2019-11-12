@@ -126,3 +126,48 @@ def haar_detection(image, cascade_classifier, classifiers, bovw, threshold=0.5):
             detections.append((x, y, x_end, y_end, predict_score))
     
     return detections
+
+# Similar to convert_bboxes_to_file but to be used for a list of images' bounding boxes
+def convert_imgs_bboxes_to_file(img_names, img_bboxes, classname):
+    """
+    img_names: list of image names
+    img_bboxes: list of list of bounding boxes (x1, x2, y1, y2, score)
+    classname: name of the class
+    """
+    
+    curr_wd = os.getcwd()
+    output_bboxes_path = os.path.join(curr_wd, 'baseline', 'output')
+    bboxes_file_path = os.path.join(output_bboxes_path, classname + ".txt")
+    
+    if not os.path.exists(output_bboxes_path):
+        os.makedirs(output_bboxes_path)
+    
+    with open(bboxes_file_path, 'w') as fp:
+        for idx, imgname in enumerate(img_names) :
+            convert_bboxes_to_file(imgname, img_bboxes[idx], classname, reset_file=False)
+
+# Function that prepare a list of bounding boxes as a text file to be fed to voc_eval
+# File is created anew by default, set reset_file to False to append to an existing file
+# Used for one image
+def convert_bboxes_to_file(imgname, bboxes, classname, reset_file=True):
+    """
+    imgname: name of the image
+    bboxes: list of bounding boxes (x1, x2, y1, y2, score)
+    classname: name of the class
+    reset_file: whether to reset the file if it alr exists
+    """
+    
+    curr_wd = os.getcwd()
+    output_bboxes_path = os.path.join(curr_wd, 'baseline', 'output')
+    bboxes_file_path = os.path.join(output_bboxes_path, classname + ".txt")
+    
+    if not os.path.exists(output_bboxes_path):
+        os.makedirs(output_bboxes_path)
+        
+    open_mode = 'w'
+    if not reset_file:
+        open_mode = 'a'
+    
+    with open(bboxes_file_path, open_mode) as fp:
+        for box in bboxes:
+            fp.write(('{} {} {} {} {}\n'.format(imgname, box[4], box[0], box[1], box[2], box[3])))
