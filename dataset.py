@@ -479,3 +479,26 @@ def extract_data(data):
     labels = [x[1] for x in data] # Extract labels
 
     return examples, labels
+
+# Function that retrieves the file paths for validation images
+def get_val_image_paths():
+    curr_wd = os.getcwd()
+
+    # Get validation image numbers
+    val_set_path = os.path.join(curr_wd, 'datasets/', 'ImageSets/', 'val.txt')
+    val_images_index = []
+    with open(val_set_path, 'r') as f:
+        for line in f:
+            val_images_index.append(line.strip())
+            
+    # Get validation image paths
+    image_directory = os.path.join(curr_wd, 'datasets/', 'JPEGImages/')
+    image_paths = load_full_subdir(image_directory)
+
+    val_images_path = []
+    for path in image_paths:
+        filename, extension = os.path.splitext(os.path.basename(path))
+        if extension == '.jpg' and filename in val_images_index:
+            val_images_path.append(path)
+
+    return val_images_path

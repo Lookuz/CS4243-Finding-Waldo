@@ -110,7 +110,7 @@ def get_prediction(clf, feature_vector):
 # and scores each window using the model supplied
 # Pyramidal scaling is also applied to apply sliding window over multiscale situations
 # window_size = (r, c)/ (y, x)
-def detect(image, bag_of_words, clf, window_scale=4, scale=2, desc_type='kaze'):
+def detect(image, bag_of_words, clf, window_scale=4, scale=2, desc_type='kaze', suppress=False):
     detections = [] # To store detected window coordinates
     current_scale = 0
     pyramid_window = (image.shape[1] // 4, image.shape[0] // 4)
@@ -119,8 +119,9 @@ def detect(image, bag_of_words, clf, window_scale=4, scale=2, desc_type='kaze'):
     
     # Apply pyramidal sliding window
     for scaled_window in window_pyramid(window_size, scale=2):
-        print('Current Window Size: ', scaled_window[0], scaled_window[1])
-        print('Current step size: ', step_size)
+        if not suppress:
+            print('Current Window Size: ', scaled_window[0], scaled_window[1])
+            print('Current step size: ', step_size)
         # Resized window too big
         # if scaled_window[0] < pyramid_window[1] or scaled_window[1] < pyramid_window[0]:
         #     break
