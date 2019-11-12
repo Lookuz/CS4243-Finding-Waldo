@@ -169,7 +169,7 @@ def convert_bboxes_to_file(imgname, bboxes, classname, reset_file=True):
     
     with open(bboxes_file_path, open_mode) as fp:
         for box in bboxes:
-            fp.write(('{} {} {} {} {}\n'.format(imgname, box[4], box[0], box[1], box[2], box[3])))
+            fp.write(('{} {} {} {} {} {}\n'.format(imgname, box[4], box[0], box[1], box[2], box[3])))
 
 # Function that performs the final object detection on a list of given images
 # Saves the detections to the baseline folder 
