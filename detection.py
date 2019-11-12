@@ -58,7 +58,7 @@ def load_haar_classifier(detection_class='waldo'):
     try:
         haar_classifier = cv2.CascadeClassifier(haar_classifier_filepath_map[detection_class])
         return haar_classifier
-    except Error as e:
+    except OSError as e:
         print(e)
 
 # Function that loads all classifiers for the given detection class
@@ -104,7 +104,6 @@ def haar_filtering(image, detections, cascade_classifier):
 
 # Obtains haar detection boxes from image, then score the haar detections
 # and select only the detections that score beyond the specified threshold
-
 def haar_detection(image, cascade_classifier, classifiers, bovw, threshold=0.5):
     # Get haar detections
     haar_boxes = cascade_classifier.detectMultiScale(image, scaleFactor=1.05, minNeighbors=5, minSize=(100, 100), maxSize=(400, 400))
@@ -171,3 +170,54 @@ def convert_bboxes_to_file(imgname, bboxes, classname, reset_file=True):
     with open(bboxes_file_path, open_mode) as fp:
         for box in bboxes:
             fp.write(('{} {} {} {} {}\n'.format(imgname, box[4], box[0], box[1], box[2], box[3])))
+
+# Function that performs the final object detection on a list of given images
+# Saves the detections to the baseline folder 
+"""
+Parameters: 
+image_filepath - List of file paths to the images to be processed
+classifiers - Classification models to be used for scoring windows
+classname - Type of object to be detected: waldo, wenda or wizard
+detection_type - Determines what type of detection to use:
+    window_scoring - uses sliding window object detection
+    haar_filtering - combines sliding window objection with haar cascade filtering
+    haar_detection - performs haar cascade detection on the image, then score each haar detection with classifiers
+"""
+def object_detection(image_filepath, classname, desc_type='sift', detection_type='window_scoring', bovw=None, classifiers=None):
+
+    # Load default bovw and classifiers
+    if bovw is None:
+        bovw = load_bovw(classname, desc_type=desc_type)
+    # NOTE: Feel free to use optional classifiers argument to specify own classifiers
+    if classifiers is None:
+        classifiers = load_classifiers(classname)
+    
+    cascade_classifier = load_haar_classifier() # Only for Waldo
+
+    img_bboxes = [] # List of list of bounding boxes. Index of the bounding boxes is equivalent to index of image name in image_list
+    img_names = [os.path.splitext(os.path.basename(path))[0] for path in image_filepath] # Extract image names
+    
+    # For each image:
+    for path in image_filepath:
+        print('Processing Image ', path)
+        image = cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2RGB)
+        # obtain detections using the specified detection_type method
+        if detection_type == 'window_scoring' or classname in ['wenda', 'wizard']:
+            detections = detect(image, bovw, classifiers, window_scale=5, desc_type=desc_type, suppress=True)
+        elif detection_type == 'haar_filtering':
+            detections = detect(image, bovw, classifiers, window_scale=5, desc_type=desc_type, suppress=True)
+            detections = haar_filtering(image, classifiers, cascade_classifier)
+        elif detection_type == 'haar_detection':
+            detections = haar_detection(image, cascade_classifier, classifiers, bovw)
+            detections = non_max_suppression(detections, threshold=0.1, score_threshold=0.5)
+        else: 
+            print('Invalid detection type!')
+            return
+
+        # Append the detections to img_bboxes
+        img_bboxes.append(detections)
+    
+    # Save detections
+    convert_imgs_bboxes_to_file(img_names, img_bboxes, classname)
+
+    return img_bboxes
