@@ -38,7 +38,9 @@ classifiers_filepath_map = {
 }
 
 haar_classifier_filepath_map = {
-    'waldo' : os.path.join(classifiers_filepath, 'waldo/', 'haar_cascade.xml')
+    'waldo': os.path.join(classifiers_filepath, 'waldo/', 'haar_cascade.xml'),
+    'wenda': os.path.join(classifiers_filepath, 'waldo/', 'haar_cascade.xml'),
+    'wizard': os.path.join(classifiers_filepath, 'haarcascade_upperbody.xml'),
 }
 
 
@@ -57,6 +59,7 @@ bovw_filepath_map = {
 # Uses XML file from the defined file path to load the trained parameters
 def load_haar_classifier(detection_class='waldo'):
     try:
+        assert os.path.isfile(haar_classifier_filepath_map[detection_class])
         haar_classifier = cv2.CascadeClassifier(haar_classifier_filepath_map[detection_class])
         return haar_classifier
     except OSError as e:
@@ -229,8 +232,8 @@ def object_detection_complex(image_filepath, classname):
     sift_classifier_fir = PreparedClassifier(classname, 'hard')
     sift_classifier_sec = PreparedClassifier(classname, 'mix')
     cascade_classifier = None
-    if classname=='waldo':
-        cascade_classifier = load_haar_classifier() # Only for Waldo
+    if classname=='waldo' or 'wenda' or 'wizard':
+        cascade_classifier = load_haar_classifier(detection_class=classname) # Only for Waldo
 
     img_bboxes = []
     img_names = [os.path.splitext(os.path.basename(path))[0] for path in image_filepath]
@@ -241,7 +244,7 @@ def object_detection_complex(image_filepath, classname):
         image = cv2.imread(path)
         detections = []
 
-        if classname == 'waldo':
+        if classname == 'waldo' or 'wenda' or 'wizard':
             haar_boxes = cascade_classifier.detectMultiScale(image, scaleFactor=1.05, minNeighbors=5,
                                                              minSize=(100, 100), maxSize=(400, 400))
             for box in haar_boxes:
@@ -255,8 +258,17 @@ def object_detection_complex(image_filepath, classname):
                 if predict_score >= 0.5:
                     detections.append((x, y, x_end, y_end, predict_score))
         else:
+            # check color first
+            hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
             for coordinates, window in detect_window_loader(image):
                 y, x, y_end, x_end = coordinates
+
+                hsv = hsv_img[y:y_end, x:x_end]
+                hist = cv2.calcHist([hsv], [0], None, [10], [0, 180])
+                hist /= hist.sum()
+                if hist[[0, 1, -1]].sum() < 0.35 or hist[0] < 0.15:
+                    continue
+
                 predict_score = surf_classifier.predict_proba([window])[0][1]
                 if predict_score >= 0.8:
                     detections.append((x, y, x_end, y_end, predict_score))
@@ -283,8 +295,8 @@ def object_detection_complex(image_filepath, classname):
                 detections_third.append((x, y, x_end, y_end, predict_score))
 
         detections_third = non_max_suppression(detections_third, threshold=0.2, score_threshold=0.8)
-        if len(detections_third) > 5:
-            detections_third = detections_third[:5]
+        if len(detections_third) > 3:
+            detections_third = detections_third[:3]
 
         # Append the detections to img_bboxes
         img_bboxes.append(detections_third)
