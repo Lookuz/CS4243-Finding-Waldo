@@ -258,7 +258,7 @@ def object_detection_complex(image_filepath, classname):
             for coordinates, window in detect_window_loader(image):
                 y, x, y_end, x_end = coordinates
                 predict_score = surf_classifier.predict_proba([window])[0][1]
-                if predict_score >= 0.7:
+                if predict_score >= 0.8:
                     detections.append((x, y, x_end, y_end, predict_score))
 
         # level 1 suppresion

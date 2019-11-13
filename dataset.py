@@ -336,6 +336,51 @@ def save_random_patches(img_lst, num_per_img):
                     np.save(result_path, patch)
 
 
+def save_random_images(img_lst, num_per_img):
+    # image 001, 004, 006, 032, 043, 048, 068 should not be used
+    bad_sources = ['001', '004', '006', '032', '043', '048', '068']
+
+    goal_dir = os.getcwd()
+    images_src_path = os.path.join(goal_dir, 'datasets', 'JPEGImages')
+    images_dsc_path = os.path.join(goal_dir, 'datasets', 'bg')
+
+    load_dir(images_dsc_path)
+    clean_dir(images_dsc_path)
+
+    scale_factor = {
+        'face': (1.0, 1.0),
+        'half': (1.5, 1.0),
+        'full': (2.0, 1.5),
+    }
+
+    total_idx = 0
+    for img_name in img_lst:
+        # DONNOT load from these images
+        if img_name in bad_sources:
+            continue
+
+        img_file_name = f'{img_name}.jpg'
+        img_src_path = os.path.join(images_src_path, img_file_name)
+        img_data = cv2.imread(img_src_path)
+        im_h, im_w, _ = img_data.shape
+
+        for k, v in scale_factor.items():
+            x = np.random.randint(0, im_w - 150, num_per_img)
+            y = np.random.randint(0, im_h - 300, num_per_img)
+            widths = np.random.randint(40, 150, num_per_img)
+            ratio = v[0] + np.random.random(num_per_img) * v[1]
+            heights = np.multiply(widths, ratio).astype(int)
+            x_end = x + widths
+            y_end = y + heights
+
+            for idx in range(num_per_img):
+                patch = img_data[y[idx]:y_end[idx], x[idx]:x_end[idx]]
+                result_file_name = f'{total_idx}.jpg'
+                result_path = os.path.join(images_dsc_path, result_file_name)
+                cv2.imwrite(result_path, patch)
+                total_idx += 1
+
+
 # Loads image from the provided paths list
 def data_loader(instances):
     for instance in instances:
