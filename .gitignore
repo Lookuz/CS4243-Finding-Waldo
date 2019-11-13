@@ -1,7 +1,6 @@
 *.xml
 *.jpg
 *.npy
-*.pkl
 *.pyc
 .ipynb_checkpoints/*
 __pycache__/*

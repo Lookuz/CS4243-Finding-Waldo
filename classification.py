@@ -4,6 +4,9 @@
     TODO: implement KNN if necessary
 """
 
+import pickle
+import joblib
+
 from scipy.spatial.distance import cdist
 from sklearn import metrics as sk_metrics
 from sklearn.svm import SVC
@@ -122,6 +125,52 @@ class Classifier:
     def predict_proba(self, X):
         if not self.trained:
             print(f'use default paramters to train')
+        feats = self.load_feats(X)
+        return self.clf.predict_proba(feats)
+
+
+class PreparedClassifier:
+    def __init__(self, class_name, mode):
+        cur_dir = os.getcwd()
+        vocab_name = f'{class_name}_{mode}.pkl'
+        model_name = f'{class_name}_{mode}.joblib'
+        model_path = os.path.join(cur_dir, 'complex_models', model_name)
+        vocab_path = os.path.join(cur_dir, 'complex_vocabs', vocab_name)
+        with open(model_path, 'rb') as fp:
+            self.clf = joblib.load(fp)
+        with open(vocab_path, 'rb') as fp:
+            self.vocabs = pickle.load(fp)
+        self.method = 'surf' if mode == 'simple' else 'sift'
+
+        self.DSP_OBJ = None
+        if self.method == 'surf':
+            self.DSP_OBJ = cv.xfeatures2d.SURF_create(500)
+            self.DSP_OBJ.setUpright(True)
+            self.DSP_OBJ.setExtended(True)
+        self.metrics = 'euclidean'
+
+
+    def load_feats(self, X):
+        vocab_num = len(self.vocabs)
+        feats = []
+        for img_data in X:
+            descriptors = get_feat(img_data, method=self.method,
+                                   step=sample_step, size=sample_size,
+                                   DSP_OBJ=self.DSP_OBJ)
+            hist_feature = np.zeros(vocab_num)
+            if descriptors is not None:
+                dists = cdist(descriptors, self.vocabs, self.metrics)
+                classifications = np.argmin(dists, axis=1)
+                occurences = np.bincount(classifications, minlength=vocab_num)
+                hist_feature = occurences / np.linalg.norm(occurences)
+            feats.append(hist_feature)
+        return np.array(feats, dtype='f')
+
+    def predict(self, X):
+        feats = self.load_feats(X)
+        return self.clf.predict(feats)
+
+    def predict_proba(self, X):
         feats = self.load_feats(X)
         return self.clf.predict_proba(feats)
 

@@ -21,6 +21,7 @@ from dataset import *
 from descriptor import *
 from SlidingWindow import *
 from BagOfWords import *
+from classification import *
 
 detection_classes = ['waldo'] # TODO: Add Wenda and Wizard once detection classifiers and bovw have been trained for them
 
@@ -217,6 +218,77 @@ def object_detection(image_filepath, classname, desc_type='sift', detection_type
         # Append the detections to img_bboxes
         img_bboxes.append(detections)
     
+    # Save detections
+    convert_imgs_bboxes_to_file(img_names, img_bboxes, classname)
+
+    return img_bboxes
+
+
+def object_detection_complex(image_filepath, classname):
+    surf_classifier = PreparedClassifier(classname, 'simple')
+    sift_classifier_fir = PreparedClassifier(classname, 'hard')
+    sift_classifier_sec = PreparedClassifier(classname, 'mix')
+    cascade_classifier = None
+    if classname=='waldo':
+        cascade_classifier = load_haar_classifier() # Only for Waldo
+
+    img_bboxes = []
+    img_names = [os.path.splitext(os.path.basename(path))[0] for path in image_filepath]
+
+    # For each image:
+    for path in image_filepath:
+        print('Processing Image ', path)
+        image = cv2.imread(path)
+        detections = []
+
+        if classname == 'waldo':
+            haar_boxes = cascade_classifier.detectMultiScale(image, scaleFactor=1.05, minNeighbors=5,
+                                                             minSize=(100, 100), maxSize=(400, 400))
+            for box in haar_boxes:
+                x = box[0]
+                y = box[1]
+                x_end = x + box[2]
+                y_end = y + box[3]
+                window = image[y:y_end, x:x_end]
+
+                predict_score = surf_classifier.predict_proba([window])[0][1]
+                if predict_score >= 0.7:
+                    detections.append((x, y, x_end, y_end, predict_score))
+        else:
+            for coordinates, window in detect_window_loader(image):
+                y, x, y_end, x_end = coordinates
+                predict_score = surf_classifier.predict_proba([window])[0][1]
+                if predict_score >= 0.7:
+                    detections.append((x, y, x_end, y_end, predict_score))
+
+        # level 1 suppresion
+        detections = non_max_suppression(detections, threshold=0.5, score_threshold=0.7)
+        if len(detections) > 200:
+            detections = detections[:200]
+
+        detections_second = []
+        for detection in detections:
+            x, y, x_end, y_end, score = detection
+            window = image[y:y_end, x:x_end]
+            predict_score = sift_classifier_fir.predict_proba([window])[0][1]
+            if predict_score > 0.7:
+                detections_second.append((x, y, x_end, y_end, predict_score))
+
+        detections_third = []
+        for detection in detections_second:
+            x, y, x_end, y_end, score = detection
+            window = image[y:y_end, x:x_end]
+            predict_score = sift_classifier_sec.predict_proba([window])[0][1]
+            if predict_score > 0.7:
+                detections_third.append((x, y, x_end, y_end, predict_score))
+
+        detections_third = non_max_suppression(detections_third, threshold=0.2, score_threshold=0.8)
+        if len(detections_third) > 5:
+            detections_third = detections_third[:5]
+
+        # Append the detections to img_bboxes
+        img_bboxes.append(detections_third)
+
     # Save detections
     convert_imgs_bboxes_to_file(img_names, img_bboxes, classname)
 
