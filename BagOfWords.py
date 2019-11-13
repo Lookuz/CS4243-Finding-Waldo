@@ -194,11 +194,11 @@ def detect_with_clf(image, clf, step_size=250, window_size=(400, 300), scale=1.5
 
 # provide detect window
 def detect_window_loader(image):
-    window_size = (400, 250)
+    window_size = (300, 200)
     step_size = min(window_size[0] // 2, window_size[1] // 2)
 
     # Apply pyramidal sliding window
-    for scaled_window in window_pyramid(window_size, scale=2):
+    for scaled_window in window_pyramid(window_size, scale=1):
         for (coordinates, window) in sliding_window(image, step_size=step_size, window_size=scaled_window):
             yield coordinates, window
 

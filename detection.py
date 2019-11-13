@@ -96,7 +96,7 @@ def haar_filtering(image, detections, cascade_classifier):
         # scaleFactor: For multiscale detection. Higher scale is faster detection, but less accurate. Recommend adjustments in intervals of 0.05
         # minNeighbours: Number of nieghbours for KNN classification. Higher value means greater threshold, but may result in missed detections
         # minSize/maxSize: range of size of patches
-        rectangles = cascade_classifier.detectMultiScale(patch, scaleFactor=1.05, minNeighbors=5, minSize=(100, 100), maxSize=(400, 400))
+        rectangles = cascade_classifier.detectMultiScale(patch, scaleFactor=1.05, minNeighbors=5, minSize=(100, 75), maxSize=(600, 600))
 
         if len(rectangles) > 0:
             final_detections.append((x1, y1, x2, y2, score))
@@ -252,7 +252,7 @@ def object_detection_complex(image_filepath, classname):
                 window = image[y:y_end, x:x_end]
 
                 predict_score = surf_classifier.predict_proba([window])[0][1]
-                if predict_score >= 0.7:
+                if predict_score >= 0.5:
                     detections.append((x, y, x_end, y_end, predict_score))
         else:
             for coordinates, window in detect_window_loader(image):
