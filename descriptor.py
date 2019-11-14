@@ -2,7 +2,6 @@
     Descriptors Methods used for feature extraction.
     Notice the image passed are raw cv.imread result,
     i.e. haven't divided by 255, still in BGR order
-    TODO: add SURF, KAZE etc
 """
 
 import numpy as np
