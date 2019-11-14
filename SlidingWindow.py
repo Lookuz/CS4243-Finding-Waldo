@@ -62,7 +62,7 @@ def calculate_iou(box_1, box_2):
     box1_area = (box_1[2] - box_1[0] + 1) * (box_1[3] - box_1[1] + 1)
     box2_area = (box_2[2] - box_2[0] + 1) * (box_2[3] - box_2[1] + 1)
     
-    iou = intersection / (box1_area + box2_area - intersection)
+    iou = intersection / min(box1_area, box2_area)
     
     return iou
 
@@ -83,8 +83,6 @@ def non_max_suppression(detections, threshold=0.5, score_threshold=0.7):
     detections = sorted(detections, key=lambda x: -x[4])
     
     final_detections = []
-    final_detections.append(detections[0])
-    detections.pop(0)
     
     for index, detection in enumerate(detections):
         overlap = False
@@ -97,7 +95,5 @@ def non_max_suppression(detections, threshold=0.5, score_threshold=0.7):
         # Overlap below threshold
         if not overlap:
             final_detections.append(detection)
-            
-        detections.pop(index)
     
     return final_detections

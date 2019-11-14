@@ -21,6 +21,7 @@ from dataset import *
 from descriptor import *
 from SlidingWindow import *
 from BagOfWords import *
+from classification import *
 
 detection_classes = ['waldo'] # TODO: Add Wenda and Wizard once detection classifiers and bovw have been trained for them
 
@@ -37,7 +38,9 @@ classifiers_filepath_map = {
 }
 
 haar_classifier_filepath_map = {
-    'waldo' : os.path.join(classifiers_filepath, 'waldo/', 'haar_cascade.xml')
+    'waldo': os.path.join(classifiers_filepath, 'waldo/', 'haar_cascade.xml'),
+    'wenda': os.path.join(classifiers_filepath, 'waldo/', 'haar_cascade.xml'),
+    'wizard': os.path.join(classifiers_filepath, 'haarcascade_upperbody.xml'),
 }
 
 
@@ -56,6 +59,7 @@ bovw_filepath_map = {
 # Uses XML file from the defined file path to load the trained parameters
 def load_haar_classifier(detection_class='waldo'):
     try:
+        assert os.path.isfile(haar_classifier_filepath_map[detection_class])
         haar_classifier = cv2.CascadeClassifier(haar_classifier_filepath_map[detection_class])
         return haar_classifier
     except OSError as e:
@@ -95,7 +99,7 @@ def haar_filtering(image, detections, cascade_classifier):
         # scaleFactor: For multiscale detection. Higher scale is faster detection, but less accurate. Recommend adjustments in intervals of 0.05
         # minNeighbours: Number of nieghbours for KNN classification. Higher value means greater threshold, but may result in missed detections
         # minSize/maxSize: range of size of patches
-        rectangles = cascade_classifier.detectMultiScale(patch, scaleFactor=1.05, minNeighbors=5, minSize=(100, 100), maxSize=(400, 400))
+        rectangles = cascade_classifier.detectMultiScale(patch, scaleFactor=1.05, minNeighbors=5, minSize=(100, 75), maxSize=(600, 600))
 
         if len(rectangles) > 0:
             final_detections.append((x1, y1, x2, y2, score))
@@ -217,6 +221,93 @@ def object_detection(image_filepath, classname, desc_type='sift', detection_type
         # Append the detections to img_bboxes
         img_bboxes.append(detections)
     
+    # Save detections
+    convert_imgs_bboxes_to_file(img_names, img_bboxes, classname)
+
+    return img_bboxes
+
+
+def object_detection_complex(image_filepath, classname):
+    surf_classifier = PreparedClassifier(classname, 'simple')
+    sift_classifier_fir = PreparedClassifier(classname, 'hard')
+    sift_classifier_sec = PreparedClassifier(classname, 'mix')
+    cascade_classifier = None
+    if classname=='waldo' or 'wenda' or 'wizard':
+        cascade_classifier = load_haar_classifier(detection_class=classname) # Only for Waldo
+
+    img_bboxes = []
+    img_names = [os.path.splitext(os.path.basename(path))[0] for path in image_filepath]
+
+    # For each image:
+    for path in image_filepath:
+        print('Processing Image ', path)
+        image = cv2.imread(path)
+        detections = []
+
+        if classname == 'waldo' or 'wenda' or 'wizard':
+            haar_boxes = cascade_classifier.detectMultiScale(image, scaleFactor=1.05, minNeighbors=5,
+                                                             minSize=(100, 100), maxSize=(400, 400))
+            for box in haar_boxes:
+                x = box[0]
+                y = box[1]
+                x_end = x + box[2]
+                y_end = y + box[3]
+                window = image[y:y_end, x:x_end]
+
+                predict_score = surf_classifier.predict_proba([window])[0][1]
+                if predict_score >= 0.5:
+                    detections.append((x, y, x_end, y_end, predict_score))
+        else:
+            # check color first
+            hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+            for coordinates, window in detect_window_loader(image):
+                y, x, y_end, x_end = coordinates
+
+                hsv = hsv_img[y:y_end, x:x_end]
+                hist = cv2.calcHist([hsv], [0], None, [10], [0, 180])
+                hist /= hist.sum()
+                if hist[[0, 1, -1]].sum() < 0.35 or hist[0] < 0.15:
+                    continue
+
+                predict_score = surf_classifier.predict_proba([window])[0][1]
+                if predict_score >= 0.8:
+                    detections.append((x, y, x_end, y_end, predict_score))
+
+        # level 1 suppresion
+        detections = non_max_suppression(detections, threshold=0.8, score_threshold=0.7)
+        if len(detections) > 250:
+            detections = detections[:250]
+
+        detections_second = []
+        for detection in detections:
+            x, y, x_end, y_end, score = detection
+            window = image[y:y_end, x:x_end]
+            predict_score = sift_classifier_fir.predict_proba([window])[0][1]
+            if predict_score > 0.7:
+                detections_second.append((x, y, x_end, y_end, predict_score))
+
+        detections_third = []
+        for detection in detections_second:
+            x, y, x_end, y_end, score = detection
+            window = image[y:y_end, x:x_end]
+            predict_score = sift_classifier_sec.predict_proba([window])[0][1]
+            if predict_score > 0.7:
+                detections_third.append((x, y, x_end, y_end, predict_score))
+
+        detections_third = non_max_suppression(detections_third, threshold=0.2, score_threshold=0.8)
+        if len(detections_third) > 3:
+            detections_third = detections_third[:3]
+
+        # Append the detections to img_bboxes
+        # convert the box size
+        detections_final = []
+        for box in detections_third:
+            x, y, x_end, y_end, score = box
+            h = y_end - y
+            y_end = y + int(1.5 * h)
+            detections_final.append((x, y, x_end, y_end, score))
+        img_bboxes.append(detections_final)
+
     # Save detections
     convert_imgs_bboxes_to_file(img_names, img_bboxes, classname)
 
