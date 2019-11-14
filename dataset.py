@@ -487,11 +487,12 @@ def prepare_classification_dataloader(pos_classes, neg_classes=None, simple=True
             instance = [patch_dir, 1]
             instances.append(instance)
 
-    if simple or not neg_classes:
-        neg_patch_folder_pths = [os.path.join(goal_dir, 'datasets', 'classification', 'random', rnd_type)
+    neg_patch_folder_pths = []
+    if simple or (neg_classes is None):
+        neg_patch_folder_pths += [os.path.join(goal_dir, 'datasets', 'classification', 'random', rnd_type)
                                  for rnd_type in random_types]
-    else:
-        neg_patch_folder_pths = [os.path.join(goal_dir, 'datasets', 'classification', 'extra', *(cls_type.split('_')))
+    if neg_classes is not None:
+        neg_patch_folder_pths += [os.path.join(goal_dir, 'datasets', 'classification', 'extra', *(cls_type.split('_')))
                                  for cls_type in neg_classes]
 
     for neg_patch_folder_pth in neg_patch_folder_pths:

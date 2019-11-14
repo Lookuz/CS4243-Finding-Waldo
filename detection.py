@@ -274,9 +274,9 @@ def object_detection_complex(image_filepath, classname):
                     detections.append((x, y, x_end, y_end, predict_score))
 
         # level 1 suppresion
-        detections = non_max_suppression(detections, threshold=0.5, score_threshold=0.7)
-        if len(detections) > 200:
-            detections = detections[:200]
+        detections = non_max_suppression(detections, threshold=0.8, score_threshold=0.7)
+        if len(detections) > 250:
+            detections = detections[:250]
 
         detections_second = []
         for detection in detections:
@@ -299,7 +299,14 @@ def object_detection_complex(image_filepath, classname):
             detections_third = detections_third[:3]
 
         # Append the detections to img_bboxes
-        img_bboxes.append(detections_third)
+        # convert the box size
+        detections_final = []
+        for box in detections_third:
+            x, y, x_end, y_end, score = box
+            h = y_end - y
+            y_end = y + int(1.5 * h)
+            detections_final.append((x, y, x_end, y_end, score))
+        img_bboxes.append(detections_final)
 
     # Save detections
     convert_imgs_bboxes_to_file(img_names, img_bboxes, classname)

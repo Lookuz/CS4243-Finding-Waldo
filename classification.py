@@ -184,3 +184,87 @@ class PreparedClassifier:
         return self.clf.predict_proba(feats)
 
 
+class CombinedClassifier:
+    def __init__(self, method, models):
+        self.models = []
+        self.vocabs = []
+
+        cur_dir = os.getcwd()
+        for model_group in models:
+            model_lst = []
+            vocab_lst = []
+
+            for m in model_group:
+                vocab_name = f'{m}.pkl'
+                model_name = f'{m}.joblib'
+                model_path = os.path.join(cur_dir, 'complex_models', model_name)
+                vocab_path = os.path.join(cur_dir, 'complex_vocabs', vocab_name)
+                with open(model_path, 'rb') as fp:
+                    model = joblib.load(fp)
+                with open(vocab_path, 'rb') as fp:
+                    vocab = pickle.load(fp)
+                model_lst.append(model)
+                vocab_lst.append(vocab)
+
+            self.models.append(model_lst)
+            self.vocabs.append(vocab_lst)
+
+        self.method = method
+        self.DSP_OBJ = None
+        if self.method == 'surf':
+            self.DSP_OBJ = cv.xfeatures2d.SURF_create(500)
+            self.DSP_OBJ.setUpright(True)
+            self.DSP_OBJ.setExtended(True)
+        self.metrics = 'euclidean'
+
+
+    def load_feats(self, instance):
+        feats = []
+        descriptors = get_feat(instance, method=self.method,
+                                   step=sample_step, size=sample_size,
+                                   DSP_OBJ=self.DSP_OBJ)
+        for vocab_group in self.vocabs:
+            feat_lst = []
+            for vocab in vocab_group:
+                vocab_num = len(vocab)
+                hist_feature = np.zeros(vocab_num)
+                if descriptors is not None:
+                    dists = cdist(descriptors, vocab, self.metrics)
+                    classifications = np.argmin(dists, axis=1)
+                    occurences = np.bincount(classifications, minlength=vocab_num)
+                    hist_feature = occurences / np.linalg.norm(occurences)
+                    hist_feature = np.array(hist_feature, dtype='f')
+                feat_lst.append(hist_feature)
+            feats.append(feat_lst)
+        return feats
+
+    def predict(self, instance):
+        feats = self.load_feats(instance)
+        result = 0
+        for model_group, feat_group in zip(self.models, feats):
+            current_result = 1
+            for model, feat in zip(model_group, feat_group):
+                guess = model.predict([feat])[0]
+                if guess == 0:
+                    current_result = 0
+                    break
+            if current_result == 1:
+                result = 1
+                break
+        return result
+
+    def predict_proba(self, instance):
+        feats = self.load_feats(instance)
+        max_score = 0
+        for model_group, feat_group in zip(self.models, feats):
+            current_score = 0
+            for model, feat in zip(model_group, feat_group):
+                guess = model.predict_proba([feat])[0][1]
+                if guess > current_score:
+                    current_score = guess
+            if current_score > max_score:
+                max_score = current_score
+        return max_score
+
+
+
