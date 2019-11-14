@@ -115,6 +115,15 @@ class Classifier:
 
         self.trained = True
 
+    def save_as(self, model_name):
+        model_path = os.path.join(os.getcwd(), 'complex_models', f'{model_name}.joblib')
+        vocab_path = os.path.join(os.getcwd(), 'complex_vocabs', f'{model_name}.pkl')
+        with open(model_path, 'wb') as fp:
+            joblib.dump(self.clf, fp)
+        with open(vocab_path, 'wb') as fp:
+            pickle.dump(self.vocabs, fp)
+
+
     def predict(self, X):
         if not self.trained:
             print(f'use default paramters to train')
