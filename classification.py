@@ -1,7 +1,5 @@
 """
     The core part: get the classifier
-    TODO: adjust parameters provided
-    TODO: implement KNN if necessary
 """
 
 import pickle
@@ -138,6 +136,9 @@ class Classifier:
         return self.clf.predict_proba(feats)
 
 
+"""
+    Load the classifiers from the trained models
+"""
 class PreparedClassifier:
     def __init__(self, class_name, mode):
         cur_dir = os.getcwd()
@@ -184,6 +185,9 @@ class PreparedClassifier:
         return self.clf.predict_proba(feats)
 
 
+"""
+    Make the decision based on the predictions from multiple classifiers
+"""
 class CombinedClassifier:
     def __init__(self, method, models):
         self.models = []

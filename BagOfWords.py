@@ -161,7 +161,9 @@ def detect(image, bag_of_words, clf, window_scale=4, scale=2, desc_type='kaze', 
     return detections
 
 
-# detect that need no vocabs provided
+"""
+    detect the object without providing features explicitly
+"""
 def detect_with_clf(image, clf, step_size=250, window_size=(400, 300), scale=1.5, pyramid_window=(2000, 2000)):
     detections = []  # To store detected window coordinates
     current_scale = 0
@@ -192,7 +194,10 @@ def detect_with_clf(image, clf, step_size=250, window_size=(400, 300), scale=1.5
     
     return detections
 
-# provide detect window
+
+"""
+    candidate windows loader
+"""
 def detect_window_loader(image):
     window_size = (300, 200)
     step_size = min(window_size[0] // 2, window_size[1] // 2)

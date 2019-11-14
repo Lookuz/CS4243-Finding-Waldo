@@ -516,6 +516,7 @@ def prepare_classification_dataloader(pos_classes, neg_classes=None, simple=True
     return data_loader(instances[num_validation:]), \
            data_loader(instances[:num_validation])
 
+
 # Function that extracts the training examples and labels
 # from the provided training_instances
 # Crafted to be used in conjunction with prepare_classification_loader

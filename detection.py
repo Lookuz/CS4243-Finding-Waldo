@@ -65,6 +65,7 @@ def load_haar_classifier(detection_class='waldo'):
     except OSError as e:
         print(e)
 
+
 # Function that loads all classifiers for the given detection class
 def load_classifiers(detection_class, desc_type='sift'):
     classifiers = []
@@ -76,6 +77,7 @@ def load_classifiers(detection_class, desc_type='sift'):
     
     return classifiers
 
+
 # Function that loads the bag of visual words vocabulary 
 # For the provided detection class using the desc_type descriptor type
 def load_bovw(detection_class, desc_type='sift'):
@@ -85,6 +87,7 @@ def load_bovw(detection_class, desc_type='sift'):
         bovw = pickle.load(f)
     
     return bovw
+
 
 # Perform haar cascade filtering on the sliding window detection bounding boxes
 # detections: bounding boxes from sliding window detections. Should be in the format (x1, y1, x2, y2)
@@ -105,6 +108,7 @@ def haar_filtering(image, detections, cascade_classifier):
             final_detections.append((x1, y1, x2, y2, score))
     
     return final_detections
+
 
 # Obtains haar detection boxes from image, then score the haar detections
 # and select only the detections that score beyond the specified threshold
@@ -148,6 +152,7 @@ def convert_imgs_bboxes_to_file(img_names, img_bboxes, classname):
     with open(bboxes_file_path, 'w') as fp:
         for idx, imgname in enumerate(img_names) :
             convert_bboxes_to_file(imgname, img_bboxes[idx], classname, reset_file=False)
+
 
 # Function that prepare a list of bounding boxes as a text file to be fed to voc_eval
 # File is created anew by default, set reset_file to False to append to an existing file
@@ -227,6 +232,9 @@ def object_detection(image_filepath, classname, desc_type='sift', detection_type
     return img_bboxes
 
 
+"""
+    detect objects using a combination of different type of classifiers
+"""
 def object_detection_complex(image_filepath, classname):
     surf_classifier = PreparedClassifier(classname, 'simple')
     sift_classifier_fir = PreparedClassifier(classname, 'hard')
