@@ -10,6 +10,7 @@ defusedxml==0.6.0
 entrypoints==0.3
 imageio==2.6.1
 importlib-metadata==0.23
+imutils==0.5.3
 ipykernel==5.1.2
 ipython==7.8.0
 ipython-genutils==0.2.0
@@ -35,7 +36,6 @@ nbformat==4.4.0
 networkx==2.3
 notebook==6.0.1
 numpy==1.17.2
-opencv-python==4.1.1.26
 pandocfilters==1.4.2
 parso==0.5.1
 pexpect==4.7.0
@@ -66,4 +66,5 @@ virtualenv-clone==0.5.3
 wcwidth==0.1.7
 webencodings==0.5.1
 widgetsnbextension==3.5.1
+xgboost==0.90
 zipp==0.6.0
