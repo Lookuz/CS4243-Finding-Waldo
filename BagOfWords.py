@@ -161,8 +161,10 @@ def detect(image, bag_of_words, clf, window_scale=4, scale=2, desc_type='kaze', 
     return detections
 
 
-# detect that need no vocabs provided
-def detect_with_clf(image, clf, step_size=250, window_size=(400, 200), scale=1.5, pyramid_window=(2000, 2000)):
+"""
+    detect the object without providing features explicitly
+"""
+def detect_with_clf(image, clf, step_size=250, window_size=(400, 300), scale=1.5, pyramid_window=(2000, 2000)):
     detections = []  # To store detected window coordinates
     current_scale = 0
 
@@ -191,6 +193,22 @@ def detect_with_clf(image, clf, step_size=250, window_size=(400, 200), scale=1.5
         current_scale += 1
     
     return detections
+
+
+"""
+    candidate windows loader
+"""
+def detect_window_loader(image):
+    window_size = (300, 200)
+    step_size = min(window_size[0] // 2, window_size[1] // 2)
+
+    # Apply pyramidal sliding window
+    for scaled_window in window_pyramid(window_size, scale=1):
+        for (coordinates, window) in sliding_window(image, step_size=step_size, window_size=scaled_window):
+            yield coordinates, window
+
+        step_size = step_size // 2
+
 
 
 # Function that evaluates the given classifier clf on the validation dataset provided

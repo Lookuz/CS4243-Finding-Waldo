@@ -336,6 +336,51 @@ def save_random_patches(img_lst, num_per_img):
                     np.save(result_path, patch)
 
 
+def save_random_images(img_lst, num_per_img):
+    # image 001, 004, 006, 032, 043, 048, 068 should not be used
+    bad_sources = ['001', '004', '006', '032', '043', '048', '068']
+
+    goal_dir = os.getcwd()
+    images_src_path = os.path.join(goal_dir, 'datasets', 'JPEGImages')
+    images_dsc_path = os.path.join(goal_dir, 'datasets', 'bg')
+
+    load_dir(images_dsc_path)
+    clean_dir(images_dsc_path)
+
+    scale_factor = {
+        'face': (1.0, 1.0),
+        'half': (1.5, 1.0),
+        'full': (2.0, 1.5),
+    }
+
+    total_idx = 0
+    for img_name in img_lst:
+        # DONNOT load from these images
+        if img_name in bad_sources:
+            continue
+
+        img_file_name = f'{img_name}.jpg'
+        img_src_path = os.path.join(images_src_path, img_file_name)
+        img_data = cv2.imread(img_src_path)
+        im_h, im_w, _ = img_data.shape
+
+        for k, v in scale_factor.items():
+            x = np.random.randint(0, im_w - 150, num_per_img)
+            y = np.random.randint(0, im_h - 300, num_per_img)
+            widths = np.random.randint(40, 150, num_per_img)
+            ratio = v[0] + np.random.random(num_per_img) * v[1]
+            heights = np.multiply(widths, ratio).astype(int)
+            x_end = x + widths
+            y_end = y + heights
+
+            for idx in range(num_per_img):
+                patch = img_data[y[idx]:y_end[idx], x[idx]:x_end[idx]]
+                result_file_name = f'{total_idx}.jpg'
+                result_path = os.path.join(images_dsc_path, result_file_name)
+                cv2.imwrite(result_path, patch)
+                total_idx += 1
+
+
 # Loads image from the provided paths list
 def data_loader(instances):
     for instance in instances:
@@ -442,11 +487,12 @@ def prepare_classification_dataloader(pos_classes, neg_classes=None, simple=True
             instance = [patch_dir, 1]
             instances.append(instance)
 
-    if simple or not neg_classes:
-        neg_patch_folder_pths = [os.path.join(goal_dir, 'datasets', 'classification', 'random', rnd_type)
+    neg_patch_folder_pths = []
+    if simple or (neg_classes is None):
+        neg_patch_folder_pths += [os.path.join(goal_dir, 'datasets', 'classification', 'random', rnd_type)
                                  for rnd_type in random_types]
-    else:
-        neg_patch_folder_pths = [os.path.join(goal_dir, 'datasets', 'classification', 'extra', *(cls_type.split('_')))
+    if neg_classes is not None:
+        neg_patch_folder_pths += [os.path.join(goal_dir, 'datasets', 'classification', 'extra', *(cls_type.split('_')))
                                  for cls_type in neg_classes]
 
     for neg_patch_folder_pth in neg_patch_folder_pths:
@@ -469,6 +515,7 @@ def prepare_classification_dataloader(pos_classes, neg_classes=None, simple=True
 
     return data_loader(instances[num_validation:]), \
            data_loader(instances[:num_validation])
+
 
 # Function that extracts the training examples and labels
 # from the provided training_instances
