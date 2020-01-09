@@ -1,4 +1,4 @@
-# CS4243 Project: Find The Waldo
+# CS4243 Project: Finding Waldo
 
 #### Prerequisites:
 - Check the `requirements.txt` for the environment required. Python 3.7.3 is used.
